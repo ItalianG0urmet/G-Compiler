@@ -1,0 +1,6 @@
+build/
+
+*.cg
+*.o
+*.asm
+*.out
