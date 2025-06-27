@@ -4,33 +4,20 @@
 #include "../include/tokenizer.h"
 #include "../include/ast.h"
 
-Node* parseNumber(Token* tokens, int* currentIndex){
-
-}
-
-Node* parseStatement(Token* tokens, int* currentIndex){
-
-}
-
-
-
 int main() {
   // -- Tokenizer --
   FILE *file = fopen("../test.cg", "r");
-
   if (!file) {
-    perror("Errore apertura test.cg");
+    perror("Error opening  test.cg \n");
     return 1;
   }
-
   Token* tokens = tokenizer(file);
   fclose(file);
 
-  printf("------ Instructions -------\n");
 
   // -- AST --
-  
   // Make FunctionList
+  printf("------ Instructions -------\n");
   FunctionList functionList = { .functions = NULL, .count = 0 };
   int currentIndex = 0;
   while(tokens[currentIndex].type != TOKEN_OEF){

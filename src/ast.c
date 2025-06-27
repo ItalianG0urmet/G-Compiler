@@ -16,7 +16,7 @@ static Node* transformIntoNode(Token* tokens, int* currentIndex){
   
   Node* node = malloc(sizeof(Node));
   if(!node){
-    printf("[-] Failed token malloc");
+    fprintf(stderr, "[-] Failed token malloc \n");
     exit(1);
   }
   //Int not init
@@ -27,22 +27,22 @@ static Node* transformIntoNode(Token* tokens, int* currentIndex){
       if(tokens[(*currentIndex) + 2].type == TOKEN_END){
         strncpy(node->name, tokens[(*currentIndex) + 1].value, sizeof(node->name));
         node->type = NO_ASSIGN_INT;
-        printf("[+] Not defined int: %s \n", node->name);
+        printf("[+] Added not defined int named %s \n", node->name);
         (*currentIndex) += 3;
         return node;
       } else if(tokens[(*currentIndex) + 2].type == TOKEN_ASSIGN) {
         if (tokens[(*currentIndex) + 3].type == TOKEN_INT && strcmp(tokens[(*currentIndex) + 3].value, "int") != 0){
           strncpy(node->name, tokens[(*currentIndex) + 1].value, sizeof(node->name));
           node->type = NO_ASSIGN_INT;
-          printf("[+] Defined int: %s \n", node->name);
+          printf("[+] Added defined int named %s \n", node->name);
           (*currentIndex) += 5;
           return node;
         } else {
-          printf("[-] Syntax error \n");
+          fprintf(stderr,"[-] Syntax error \n");
           exit(1);
         }
       } else {
-        printf("[-] Invalid var \n");
+        fprintf(stderr, "[-] Invalid var \n");
         exit(1);
       }
 
@@ -55,11 +55,11 @@ static Node* transformIntoNode(Token* tokens, int* currentIndex){
       int returnCode = atoi(tokens[(*currentIndex) + 1].value);
       node->type = NO_RETURN;
       node->number = returnCode;
-      printf("[*] Find return type, that return %d \n", returnCode);
+      printf("[+] Added return type, that return %d \n", returnCode);
       (*currentIndex) += 3;
       return node;
     } else {
-      printf("[-] Invalid syntax on return function \n");
+      fprintf(stderr, "[-] Invalid syntax on return function \n");
       exit(1);
     }
   }
@@ -70,12 +70,12 @@ static Node* transformIntoNode(Token* tokens, int* currentIndex){
       node->type = NO_PRINT;
       strncpy(node->name, tokens[*currentIndex].value, sizeof(node->name));
       (*currentIndex) += 2;
-      printf("[*] Find text type, that contains \"%s\" \n", node->name);
+      printf("[+] Added text type, that contains \"%s\" \n", node->name);
       return node;   
     }
   }
 
-  printf("[-] Unknown or unsupported token at index %d (type=%d, value='%s')\n", *currentIndex, tokens[*currentIndex].type, tokens[*currentIndex].value);
+  fprintf(stderr, "[-] Unknown or unsupported token at index %d (type=%d, value='%s')\n", *currentIndex, tokens[*currentIndex].type, tokens[*currentIndex].value);
   (*currentIndex)++;
   return NULL;
 
@@ -95,7 +95,7 @@ Function parseFunction(Token* tokens, int* currentIndex){
   fun.arguments = args; 
 
   if (identifier.type != TOKEN_IDENTIFIER || identifier.value == NULL) {
-      printf("[-] Invalid function identifier\n");
+      fprintf(stderr, "[-] Invalid function identifier\n");
       exit(1);
   }
   strncpy(fun.name, identifier.value, sizeof(fun.name)); 
@@ -113,12 +113,12 @@ Function parseFunction(Token* tokens, int* currentIndex){
   body->body = NULL;
   Node* last = NULL;
   int nodeCount = 0;
-  printf("\n[+] Definding function %s [+]\n", fun.name);
+  printf("\n[+] Defining function %s [+]\n", fun.name);
   while(tokens[*currentIndex].type != TOKEN_RBRACE && tokens[*currentIndex].type != TOKEN_OEF){
     Node* node = transformIntoNode(tokens, currentIndex);
 
     if (node == NULL) {
-      printf("[-] Failed to create AST node at token index %d\n", *currentIndex);
+      fprintf(stderr, "[-] Failed to create AST node at token index %d\n", *currentIndex);
       exit(1);
     } 
 
@@ -133,7 +133,7 @@ Function parseFunction(Token* tokens, int* currentIndex){
   }
   fun.body = body;
   fun.nodeCount = nodeCount;
-  printf("Per questa funzione abbiamo %d nodi \n", fun.nodeCount);
+  printf("[*] %s function have %d nodes \n", fun.name, fun.nodeCount);
   (*currentIndex)++;
   return fun;
 }
@@ -158,7 +158,7 @@ Argument* parseParam(Token* tokens, int currentIndex, int firstParamIndex) {
 
   Argument* arguments = malloc(sizeof(Argument) * argCount);
   if (!arguments) {
-    printf("[-] Can't allocate memory for args\n");
+    fprintf(stderr, "[-] Can't allocate memory for args\n");
     exit(1);
   }
 
@@ -172,7 +172,7 @@ Argument* parseParam(Token* tokens, int currentIndex, int firstParamIndex) {
       case TOKEN_FLOAT: arg.type = ARG_FLOAT; break;
       case TOKEN_CHAR:  arg.type = ARG_CHAR; break;
       default:
-        printf("[-] Invalid param: %s\n", tokens[index].value);
+        fprintf(stderr, "[-] Invalid param: %s\n", tokens[index].value);
         exit(1);
     }
 
@@ -192,7 +192,7 @@ void addFunctionToList(Function* fun, FunctionList* functionList) {
   functionList->functions = realloc(functionList->functions, sizeof(Function*) * (functionList->count + 1));
   
   if (!functionList->functions) {
-    printf("[-] Error reallocating memory for function list\n");
+    fprintf(stderr, "[-] Error reallocating memory for function list\n");
     exit(1);
   }
 

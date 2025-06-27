@@ -25,7 +25,6 @@ Token firstToken(char buffer[256], char current) {
         }
     }
 
-    //TODO: Mettere un identifier a parte tra int e interi definit
     strcpy(temp.value, buffer);
     return temp;
 }
@@ -36,7 +35,7 @@ void tokenPush(Token** tokens, Token* token, int* tokens_capacity, int *tokens_c
     *tokens_capacity *= 2;
     Token* new_tokens = realloc(*tokens, sizeof(Token) * (*tokens_capacity));
     if(!new_tokens){
-      perror("Can't allocate new space \n");
+      perror("[-] Can't allocate new space \n");
       exit(1);
     }
     *tokens = new_tokens;
