@@ -70,6 +70,7 @@ static Node* transformIntoNode(Token* tokens, int* currentIndex){
       node->type = NO_PRINT;
       strncpy(node->name, tokens[*currentIndex].value, sizeof(node->name));
       (*currentIndex) += 2;
+      printf("[*] Find text type, that contains \"%s\" \n", node->name);
       return node;   
     }
   }
@@ -106,6 +107,12 @@ Function parseFunction(Token* tokens, int* currentIndex){
   (*currentIndex)++;
 
   //Start node transformation
+  Node* body = malloc(sizeof(Node));
+  body->type = NO_BODY;
+  body->next = NULL;
+  body->body = NULL;
+  Node* last = NULL;
+  int nodeCount = 0;
   printf("\n[+] Definding function %s [+]\n", fun.name);
   while(tokens[*currentIndex].type != TOKEN_RBRACE && tokens[*currentIndex].type != TOKEN_OEF){
     Node* node = transformIntoNode(tokens, currentIndex);
@@ -114,8 +121,19 @@ Function parseFunction(Token* tokens, int* currentIndex){
       printf("[-] Failed to create AST node at token index %d\n", *currentIndex);
       exit(1);
     } 
-  }
 
+    if(body->body == NULL){
+      body->body = node;
+    } else {
+      last->next = node;
+    }
+
+    last = node;
+    nodeCount++;
+  }
+  fun.body = body;
+  fun.nodeCount = nodeCount;
+  printf("Per questa funzione abbiamo %d nodi \n", fun.nodeCount);
   (*currentIndex)++;
   return fun;
 }
