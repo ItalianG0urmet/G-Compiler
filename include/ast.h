@@ -19,6 +19,7 @@ typedef struct {
 } Argument;
 
 typedef enum {
+  NO_BODY,
   NO_ADD,
   NO_SUB,
   NO_MUL,
@@ -48,8 +49,8 @@ struct Node {
   Node* init; // INIT FOR
   Node* inc; // INCREMENT FOR
 
-  Node* body;
-  Node* next;
+  Node* body; // Point to the first node
+  Node* next; // Point to the next node
 
   char name[256]; //Name of var or Name of text
   int number; // only for NO_NUM or NO_RETURN
@@ -57,7 +58,8 @@ struct Node {
 };
 
 typedef struct {
-  Node** nodes;
+  Node* body;
+  int nodeCount;
   Argument* arguments;
   char name[256];
 } Function;
