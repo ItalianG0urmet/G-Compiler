@@ -4,16 +4,17 @@
 #include "../include/tokenizer.h"
 #include "../include/ast.h"
 
-int main() {
+int main(int argc, char* argv[]) {
   // -- Tokenizer --
-  FILE *file = fopen("../test.cg", "r");
+  FILE *file = fopen(argv[1], "r");
   if (!file) {
-    perror("Error opening  test.cg \n");
+    if(argv[1] == NULL) fprintf(stderr, "[-] You should specify an argument \n");
+    else fprintf(stderr, "[-] Can't find %s \n", argv[1]);
+
     return 1;
   }
   Token* tokens = tokenizer(file);
   fclose(file);
-
 
   // -- AST --
   // Make FunctionList
