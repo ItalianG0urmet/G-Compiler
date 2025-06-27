@@ -1,4 +1,4 @@
-# Gourmet Compiler ![](https://img.shields.io/badge/Platform-Linux-only-blue) ![InDev](https://img.shields.io/badge/Status-Release-red)
+# Gourmet Compiler ![](https://img.shields.io/badge/Platform-Linux-only-blue) ![InDev](https://img.shields.io/badge/Status-InDev-red)
 
 **Description:**
 
@@ -7,5 +7,11 @@ You may ask why this project? It's simple: I noticed how today's technology has 
 
 **Build instructions:**
 ```bash
-todo...
+git clone https://github.com/ItalianG0urmet/gourmet-compiler.git
+cd gourmet-compiler/
+mkdir build
+cd build
+cmake ..
+make
+./compiler
 ```
