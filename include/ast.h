@@ -16,7 +16,6 @@ typedef struct {
     float f;
     char str;
   };
-   
 } Argument;
 
 typedef enum {
@@ -24,11 +23,14 @@ typedef enum {
   NO_SUB,
   NO_MUL,
   NO_DIV,
-  NO_ASSIGN,
-  NO_NUM,
-  NO_CHAR,
+  NO_ASSIGN_INT,
+  NO_ASSIGN_FLOAT,
+  NO_ASSIGN_CHAR,
+  NO_PRINT,
   NO_RETURN,
+  NO_ASM,
   NO_IF,
+  NO_WHILE,
   NO_FOR,
   NO_FUNCALL
 } NodeType;
@@ -49,7 +51,8 @@ struct Node {
   Node* body;
   Node* next;
 
-  int number; // only for NO_NUM
+  char name[256]; //Name of var or Name of text
+  int number; // only for NO_NUM or NO_RETURN
   char str; // only for NO_CHAR
 };
 

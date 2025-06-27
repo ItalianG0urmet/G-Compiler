@@ -12,6 +12,74 @@
 //  return NULL;
 //}
 
+static Node* transformIntoNode(Token* tokens, int* currentIndex){
+  
+  Node* node = malloc(sizeof(Node));
+  if(!node){
+    printf("[-] Failed token malloc");
+    exit(1);
+  }
+  //Int not init
+  if(tokens[*currentIndex].type == TOKEN_INT && strcmp(tokens[*currentIndex].value, "int") == 0){ 
+
+    if(tokens[(*currentIndex) + 1].type == TOKEN_IDENTIFIER){
+
+      if(tokens[(*currentIndex) + 2].type == TOKEN_END){
+        strncpy(node->name, tokens[(*currentIndex) + 1].value, sizeof(node->name));
+        node->type = NO_ASSIGN_INT;
+        printf("[+] Not defined int: %s \n", node->name);
+        (*currentIndex) += 3;
+        return node;
+      } else if(tokens[(*currentIndex) + 2].type == TOKEN_ASSIGN) {
+        if (tokens[(*currentIndex) + 3].type == TOKEN_INT && strcmp(tokens[(*currentIndex) + 3].value, "int") != 0){
+          strncpy(node->name, tokens[(*currentIndex) + 1].value, sizeof(node->name));
+          node->type = NO_ASSIGN_INT;
+          printf("[+] Defined int: %s \n", node->name);
+          (*currentIndex) += 5;
+          return node;
+        } else {
+          printf("[-] Syntax error \n");
+          exit(1);
+        }
+      } else {
+        printf("[-] Invalid var \n");
+        exit(1);
+      }
+
+    }
+  }
+
+  //Return
+  if(tokens[*currentIndex].type == TOKEN_IDENTIFIER && strcmp(tokens[*currentIndex].value, "return") == 0){
+    if (tokens[(*currentIndex) + 1].type == TOKEN_INT && strcmp(tokens[(*currentIndex) + 1].value, "int") != 0){
+      int returnCode = atoi(tokens[(*currentIndex) + 1].value);
+      node->type = NO_RETURN;
+      node->number = returnCode;
+      printf("[*] Find return type, that return %d \n", returnCode);
+      (*currentIndex) += 3;
+      return node;
+    } else {
+      printf("[-] Invalid syntax on return function \n");
+      exit(1);
+    }
+  }
+
+  //Text
+  if(tokens[*currentIndex].type == TOKEN_TEXT && tokens[(*currentIndex) - 1].type != TOKEN_ASSIGN){
+    if(tokens[(*currentIndex) + 1].type == TOKEN_END){
+      node->type = NO_PRINT;
+      strncpy(node->name, tokens[*currentIndex].value, sizeof(node->name));
+      (*currentIndex) += 2;
+      return node;   
+    }
+  }
+
+  printf("[-] Unknown or unsupported token at index %d (type=%d, value='%s')\n", *currentIndex, tokens[*currentIndex].type, tokens[*currentIndex].value);
+  (*currentIndex)++;
+  return NULL;
+
+}
+
 // Create function
 Function parseFunction(Token* tokens, int* currentIndex){
   Token type = tokens[*currentIndex];
@@ -31,9 +99,22 @@ Function parseFunction(Token* tokens, int* currentIndex){
   }
   strncpy(fun.name, identifier.value, sizeof(fun.name)); 
 
-  //TODO: NOW LETS DEFINE THE AALL
-  
+  //Skip to {
+  while(tokens[*currentIndex].type != TOKEN_LBRACE){
+    (*currentIndex)++;
+  }
+  (*currentIndex)++;
 
+  //Start node transformation
+  printf("\n[+] Definding function %s [+]\n", fun.name);
+  while(tokens[*currentIndex].type != TOKEN_RBRACE && tokens[*currentIndex].type != TOKEN_OEF){
+    Node* node = transformIntoNode(tokens, currentIndex);
+
+    if (node == NULL) {
+      printf("[-] Failed to create AST node at token index %d\n", *currentIndex);
+      exit(1);
+    } 
+  }
 
   (*currentIndex)++;
   return fun;
@@ -85,7 +166,6 @@ Argument* parseParam(Token* tokens, int currentIndex, int firstParamIndex) {
     }
   }
 
-  printf("[+] Found %d param\n", argCount);
   return arguments;
 }
 

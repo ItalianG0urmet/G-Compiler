@@ -1,8 +1,8 @@
 #include "../include/tokenizer.h"
 
 Token firstToken(char buffer[256], char current) {
-    Token temp;
 
+    Token temp;
     if (strcmp(buffer, "int") == 0) {
         temp.type = TOKEN_INT;
     } else if (strcmp(buffer, "float") == 0) {
@@ -25,6 +25,7 @@ Token firstToken(char buffer[256], char current) {
         }
     }
 
+    //TODO: Mettere un identifier a parte tra int e interi definit
     strcpy(temp.value, buffer);
     return temp;
 }
