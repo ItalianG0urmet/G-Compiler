@@ -1,24 +1,13 @@
 #include "../include/ast.h"
 
-//Function getFunctionByName(char* name, FunctionList funList){
-//  int index = 0;
-//  while(index < funList.count){
-//    if(strcmp(funList.functions[index]->name, name)){
-//      return funList.functions[index];
-//    }
-//    index++;
-//  }
-//
-//  return NULL;
-//}
 
 static Node* transformIntoNode(Token* tokens, int* currentIndex){
-  
   Node* node = malloc(sizeof(Node));
   if(!node){
     fprintf(stderr, "[-] Failed token malloc \n");
     exit(1);
   }
+
   //Int not init
   if(tokens[*currentIndex].type == TOKEN_INT && strcmp(tokens[*currentIndex].value, "int") == 0){ 
 
@@ -79,6 +68,19 @@ static Node* transformIntoNode(Token* tokens, int* currentIndex){
   (*currentIndex)++;
   return NULL;
 
+}
+
+//Get function by name
+Function* getFunctionByName(char* name, FunctionList funList){
+  int index = 0;
+  while(index < funList.count){
+    if(strcmp(funList.functions[index]->name, name)){
+      return funList.functions[index];
+    }
+    index++;
+  }
+
+  return NULL;
 }
 
 // Create function

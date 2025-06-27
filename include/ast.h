@@ -12,9 +12,9 @@ typedef enum {
 typedef struct {
   ArgumentType type;
   union {
-    int i;
+    int   i;
     float f;
-    char str;
+    char  str;
   };
 } Argument;
 
@@ -40,38 +40,38 @@ typedef struct Node Node;
 
 struct Node {
   NodeType type;
-  Node* lnode;
-  Node* rnode;
+  Node*    lnode;
+  Node*    rnode;
 
-  Node* code; // IF, FOR
-  Node* then; // IF or FOR body
-  Node* els; // ELSE
-  Node* init; // INIT FOR
-  Node* inc; // INCREMENT FOR
+  Node*    code; // IF, FOR
+  Node*    then; // IF or FOR body
+  Node*    els; // ELSE
+  Node*    init; // INIT FOR
+  Node*    inc; // INCREMENT FOR
 
-  Node* body; // Point to the first node
-  Node* next; // Point to the next node
+  Node*    body; // Point to the first node
+  Node*    next; // Point to the next node
 
-  char name[256]; //Name of var or Name of text
-  int number; // only for NO_NUM or NO_RETURN
-  char str; // only for NO_CHAR
+  char     name[256]; //Name of var or Name of text
+  int      number; // only for NO_NUM or NO_RETURN
+  char     str; // only for NO_CHAR
 };
 
 typedef struct {
-  Node* body;
-  int nodeCount;
+  Node*     body;
+  int       nodeCount;
   Argument* arguments;
-  char name[256];
+  char      name[256];
 } Function;
 
 typedef struct {
   Function** functions;
-  int count;
+  int        count;
 } FunctionList;
 
-Node* getFunctionByName(char* name, FunctionList functionList);
+Function* getFunctionByName(char* name, FunctionList funList);
 Argument* parseParam(Token* tokens, int currentIndex, int firstParamIndex);
-Function parseFunction(Token* tokens, int* currentIndex);
-void addFunctionToList(Function* fun, FunctionList* functionList);
+Function  parseFunction(Token* tokens, int* currentIndex);
+void      addFunctionToList(Function* fun, FunctionList* functionList);
 
 #endif

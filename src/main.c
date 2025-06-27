@@ -36,9 +36,10 @@ int main(int argc, char* argv[]) {
 
   }
 
+  //Debug
   for(int i = 0; functionList.count > i; i++){
     Function* fun = functionList.functions[i];
-    printf("[*] name: %s \n", fun->name);
+    printf("[*] Name: %s \n", fun->name);
   }
 
   return 0;
