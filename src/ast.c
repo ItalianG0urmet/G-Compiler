@@ -84,6 +84,15 @@ Function* getFunctionByName(char* name, FunctionList funList){
 // Create function
 Function parseFunction(Token* tokens, int* currentIndex){
   Token identifier = tokens[*currentIndex+1];
+  FunReturnType returnType;
+  switch(tokens[*currentIndex].type){
+    case TOKEN_VOID: returnType = RET_VOID; break;
+    case TOKEN_INT: returnType = RET_INT; break;
+    case TOKEN_CHAR: returnType = RET_CHAR; break;
+    case TOKEN_FLOAT: returnType = RET_FLOAT; break;
+    default: fprintf(stderr, "[-] Can't find return type of %s\n", identifier.value); exit(1);
+  }
+  printf("--------------- %d \n", returnType);
   Argument* args = parseParam(tokens, *currentIndex, *currentIndex + 3);
 
   while(tokens[*currentIndex].type == TOKEN_LBRACE){

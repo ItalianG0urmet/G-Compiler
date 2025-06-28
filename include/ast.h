@@ -57,7 +57,15 @@ struct Node {
   char     str; // only for NO_CHAR
 };
 
+typedef enum {
+  RET_INT,
+  RET_CHAR,
+  RET_FLOAT,
+  RET_VOID
+} FunReturnType;
+
 typedef struct {
+  FunReturnType returnType;
   Node*     body;
   int       nodeCount;
   Argument* arguments;
