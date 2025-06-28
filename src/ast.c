@@ -83,7 +83,6 @@ Function* getFunctionByName(char* name, FunctionList funList){
 
 // Create function
 Function parseFunction(Token* tokens, int* currentIndex){
-  Token type = tokens[*currentIndex];
   Token identifier = tokens[*currentIndex+1];
   Argument* args = parseParam(tokens, *currentIndex, *currentIndex + 3);
 
@@ -94,7 +93,7 @@ Function parseFunction(Token* tokens, int* currentIndex){
   Function fun;
   fun.arguments = args; 
 
-  if (identifier.type != TOKEN_IDENTIFIER || identifier.value == NULL) {
+  if (identifier.type != TOKEN_IDENTIFIER) {
       fprintf(stderr, "[-] Invalid function identifier\n");
       exit(1);
   }
