@@ -15,7 +15,17 @@ llvm_map_components_to_libnames(llvm_libs
     core
     analysis
     executionengine
-    ; 
+    native
+    x86codegen
+    x86desc
+    x86info
+    x86asmparser
+    x86disassembler
+    mcjit
+    orcjit
+    passes
+    support
+    target
 )
 
 # Enable debug and disable optimization for clean debug
