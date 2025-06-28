@@ -1,5 +1,8 @@
 #include <stdio.h>
 #include <llvm-c/Core.h>
+#include <llvm-c/BitWriter.h>
+#include <llvm-c/Target.h>
+#include <llvm-c/TargetMachine.h>
 #include <string.h>
 #include <stdlib.h>
 #include "../include/tokenizer.h"
@@ -21,25 +24,49 @@ void generateFunctionIR(Function* fun, LLVMContextRef* context, LLVMModuleRef* m
     default: fprintf(stderr, "[-] Can't find return type in IR \n");
   }
 
+  LLVMTypeRef paramTypes[] = {}; //TODO: I should make this variable
+  LLVMTypeRef funcType = LLVMFunctionType(intType, paramTypes, 0, 0);
+  LLVMValueRef func = LLVMAddFunction(*module, fun->name, funcType);
+  LLVMBasicBlockRef entry = LLVMAppendBasicBlock(func, "entry");
+  LLVMBuilderRef builder = LLVMCreateBuilder();
+  LLVMPositionBuilderAtEnd(builder, entry);
+
   Node* node = fun->body->body;
   while(node != NULL){
-    printf("[DBG] node@%p next=%p type=%d\n", (void*)node, (void*)node->next, node->type);
     switch(node->type){
+      //TODO: case NO_ASSIGN_INT_NDEF:
       case NO_ASSIGN_INT:
-        printf("[P] Int\n");
+        LLVMValueRef var = LLVMBuildAlloca(builder, intType, node->name);
+        LLVMBuildStore(builder, LLVMConstInt(intType, node->number, 0), var);
         break;
+
       case NO_PRINT:
-        printf("[P] Print\n");
+        LLVMValueRef str = LLVMBuildGlobalStringPtr(builder, node->name, "str_const");
+        LLVMTypeRef charPtrType = LLVMPointerType(LLVMInt8Type(), 0);
+        LLVMTypeRef putsType = LLVMFunctionType(intType, &charPtrType, 1, 0);
+        LLVMValueRef putsFunc = LLVMGetNamedFunction(*module, "puts");
+        if (!putsFunc) {
+            putsFunc = LLVMAddFunction(*module, "puts", putsType);
+        }
+        LLVMValueRef args[] = {str};
+        LLVMBuildCall2(builder, putsType, putsFunc, args, 1, "");
         break;
+
       case NO_RETURN:
-        printf("[P] Return\n");
+        if (fun->returnType == RET_VOID) {
+          LLVMBuildRetVoid(builder);
+        } else {
+          LLVMBuildRet(builder, LLVMConstInt(intType, node->number, 0));
+        }
         break;
+
       default:
         printf("[P] None\n");
         break;
     }
     node = node->next;
   }
+
 }
 
 int main(int argc, char* argv[]) {
@@ -79,6 +106,8 @@ int main(int argc, char* argv[]) {
     printf("[*] Name: %s \n", fun->name);
   }
 
+  // -- LLVM -- 
+
   //Init LLVM IR convertion
   LLVMContextRef context = LLVMContextCreate();
   LLVMModuleRef module = LLVMModuleCreateWithName("module");
@@ -87,7 +116,51 @@ int main(int argc, char* argv[]) {
     fprintf(stderr, "[-] Main entry point don't exist \n");
     exit(1);
   }
+
+  printf("------ IR Generation -------\n");
   generateFunctionIR(mainFun, &context, &module);
+  char* ir = LLVMPrintModuleToString(module);
+  printf("Generated IR:\n%s\n", ir);
+  LLVMDisposeMessage(ir);
+
+  LLVMInitializeNativeTarget();
+  LLVMInitializeNativeAsmPrinter();
+  LLVMInitializeNativeAsmParser();
+
+  char* error = NULL;
+  if (LLVMTargetMachineEmitToFile(
+    LLVMCreateTargetMachine(
+      LLVMGetFirstTarget(),
+      LLVMGetDefaultTargetTriple(),
+       "",
+       "",
+       LLVMCodeGenLevelDefault,
+       LLVMRelocDefault,
+       LLVMCodeModelDefault
+   ),
+     module,
+     "output.o",
+     LLVMObjectFile,
+     &error
+  )) {
+    fprintf(stderr, "[-] Failed to emit object file: %s\n", error);
+    LLVMDisposeMessage(error);
+    return 1;
+  }
+
+  // Link
+  printf("[+] Linking to create executable...\n");
+  int linkResult = system("clang output.o -o output");
+  if (linkResult != 0) {
+    fprintf(stderr, "[-] Linking failed\n");
+   return 1;
+  }
+
+  printf("[+] Executable 'output' created successfully!\n");
+
+  // Cleanup
+  LLVMDisposeModule(module);
+  LLVMContextDispose(context);
 
   return 0;
 }
