@@ -3,7 +3,7 @@ void test(int numero){
   int x = 20;
 }
 
-void main(int number, int number2){
+void main(){
   int x = 10;
   int y;
   
