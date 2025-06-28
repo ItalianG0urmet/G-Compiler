@@ -72,16 +72,14 @@ static Node* transformIntoNode(Token* tokens, int* currentIndex){
 
 //Get function by name
 Function* getFunctionByName(char* name, FunctionList funList){
-  int index = 0;
-  while(index < funList.count){
-    if(strcmp(funList.functions[index]->name, name)){
-      return funList.functions[index];
+  for(int i = 0; i < funList.count; i++){
+    if (strcmp(funList.functions[i]->name, name) == 0) {
+      return funList.functions[i];
     }
-    index++;
   }
-
   return NULL;
 }
+
 
 // Create function
 Function parseFunction(Token* tokens, int* currentIndex){
@@ -128,6 +126,7 @@ Function parseFunction(Token* tokens, int* currentIndex){
       body->body = node;
     } else {
       last->next = node;
+      printf("New node attached, last node: %d %d %s\n", last->type, last->number, last->name);
     }
 
     last = node;
