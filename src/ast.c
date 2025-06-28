@@ -2,7 +2,7 @@
 
 
 static Node* transformIntoNode(Token* tokens, int* currentIndex){
-  Node* node = malloc(sizeof(Node));
+  Node* node = calloc(1, sizeof(Node));
   if(!node){
     fprintf(stderr, "[-] Failed token malloc \n");
     exit(1);
@@ -66,7 +66,7 @@ static Node* transformIntoNode(Token* tokens, int* currentIndex){
 
   fprintf(stderr, "[-] Unknown or unsupported token at index %d (type=%d, value='%s')\n", *currentIndex, tokens[*currentIndex].type, tokens[*currentIndex].value);
   (*currentIndex)++;
-  return NULL;
+  return node;
 
 }
 
@@ -107,10 +107,9 @@ Function parseFunction(Token* tokens, int* currentIndex){
   (*currentIndex)++;
 
   //Start node transformation
-  Node* body = malloc(sizeof(Node));
+  Node* body = calloc(1, sizeof(Node));
   body->type = NO_BODY;
-  body->next = NULL;
-  body->body = NULL;
+
   Node* last = NULL;
   int nodeCount = 0;
   printf("\n[+] Defining function %s [+]\n", fun.name);
@@ -126,12 +125,16 @@ Function parseFunction(Token* tokens, int* currentIndex){
       body->body = node;
     } else {
       last->next = node;
-      printf("New node attached, last node: %d %d %s\n", last->type, last->number, last->name);
     }
 
     last = node;
     nodeCount++;
   }
+
+  if(last){
+    last->next = NULL;
+  }
+
   fun.body = body;
   fun.nodeCount = nodeCount;
   printf("[*] %s function have %d nodes \n", fun.name, fun.nodeCount);
@@ -157,7 +160,7 @@ Argument* parseParam(Token* tokens, int currentIndex, int firstParamIndex) {
     }
   }
 
-  Argument* arguments = malloc(sizeof(Argument) * argCount);
+  Argument* arguments = calloc(argCount, sizeof(Argument));
   if (!arguments) {
     fprintf(stderr, "[-] Can't allocate memory for args\n");
     exit(1);
