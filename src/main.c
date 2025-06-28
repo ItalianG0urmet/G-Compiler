@@ -4,6 +4,28 @@
 #include "../include/tokenizer.h"
 #include "../include/ast.h"
 
+void generateFunctionIR(Function* fun){
+  Node* node = fun->body->body;
+  while(node != NULL){
+    printf("[DBG] node@%p next=%p type=%d\n", (void*)node, (void*)node->next, node->type);
+    switch(node->type){
+      case NO_ASSIGN_INT:
+        printf("[P] Int\n");
+        break;
+      case NO_PRINT:
+        printf("[P] Print\n");
+        break;
+      case NO_RETURN:
+        printf("[P] Return\n");
+        break;
+      default:
+        printf("[P] None\n");
+        break;
+    }
+    node = node->next;
+  }
+}
+
 int main(int argc, char* argv[]) {
   // -- Tokenizer --
   FILE *file = fopen(argv[1], "r");
@@ -33,7 +55,6 @@ int main(int argc, char* argv[]) {
     } else {
       currentIndex++;
     }
-
   }
 
   //Debug
@@ -41,6 +62,14 @@ int main(int argc, char* argv[]) {
     Function* fun = functionList.functions[i];
     printf("[*] Name: %s \n", fun->name);
   }
+
+  //Init LLVM IR convertion
+  Function* mainFun = getFunctionByName("main", functionList);
+  if(mainFun == NULL){
+    fprintf(stderr, "[-] Main entry point don't exist \n");
+    exit(1);
+  }
+  generateFunctionIR(mainFun);
 
   return 0;
 }
