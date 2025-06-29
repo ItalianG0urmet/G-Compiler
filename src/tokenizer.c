@@ -122,7 +122,7 @@ Token* tokenizer(FILE* file){
         }
 
         // -- Symbols --
-        if (strchr("=,;{}()", current)) {
+        if (strchr("=,;{}()><", current)) {
             if (count > 0) {
                 buffer[count] = '\0';
                 Token temp = firstToken(buffer, current);
@@ -133,6 +133,8 @@ Token* tokenizer(FILE* file){
 
             Token temp = {0};
             switch (current) {
+                case '>': temp.type = TOKEN_MAJOR; break;
+                case '<': temp.type = TOKEN_MINOR; break;
                 case '=': temp.type = TOKEN_ASSIGN; break;
                 case ';': temp.type = TOKEN_END;    break;
                 case ',': temp.type = TOKEN_COMMA;  break;

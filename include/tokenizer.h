@@ -7,25 +7,29 @@
 #include <stdlib.h>
 
 typedef enum {
-  TOKEN_TEXT, // "
-  TOKEN_VOID, // void
-  TOKEN_INT, // 0
-  TOKEN_FLOAT, // 0.0
-  TOKEN_CHAR, // char
+  TOKEN_TEXT,       // "
+  TOKEN_VOID,       // void
+  TOKEN_INT,        // 0
+  TOKEN_FLOAT,      // 0.0
+  TOKEN_CHAR,       // char
   TOKEN_IDENTIFIER, //identifier
-  TOKEN_ASSIGN, // = 
-  TOKEN_LPAREN, // (
-  TOKEN_RPAREN, // )
-  TOKEN_RBRACE, // }
-  TOKEN_LBRACE, // {
-  TOKEN_COMMA, // ,
-  TOKEN_END, // ;
-  TOKEN_OEF,
+  TOKEN_EQUAL,      // ==
+  TOKEN_AND,        // &&
+  TOKEN_MAJOR,      // >
+  TOKEN_MINOR,      // <
+  TOKEN_ASSIGN,     // = 
+  TOKEN_LPAREN,     // (
+  TOKEN_RPAREN,     // )
+  TOKEN_RBRACE,     // }
+  TOKEN_LBRACE,     // {
+  TOKEN_COMMA,      // ,
+  TOKEN_END,        // ;
+  TOKEN_OEF,   
 } TokenType;
 
 typedef struct {
   TokenType type;
-  char value[256];
+  char      value[256];
 } Token;
 
 Token firstToken(char buffer[256], char current);
