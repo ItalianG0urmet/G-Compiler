@@ -1,7 +1,9 @@
 int main(){
   int x = 10;
   
-  "First compiled program!!";
+  if(x > x){
+    "First compiled program!!";
+  }
   
   return 0;
 }
