@@ -19,8 +19,8 @@ typedef struct {
 } Argument;
 
 typedef enum {
-  NO_BODY,
-  NO_ADD,
+  NO_BODY,     
+  NO_ADD,    
   NO_SUB,
   NO_MUL,
   NO_DIV,
@@ -31,6 +31,9 @@ typedef enum {
   NO_RETURN,
   NO_ASM,
   NO_IF,
+  NO_MAJOR,  
+  NO_MINOR,
+  NO_EQUAL_TO,
   NO_WHILE,
   NO_FOR,
   NO_FUNCALL

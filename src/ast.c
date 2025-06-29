@@ -1,5 +1,49 @@
 #include "../include/ast.h"
 
+//TODO: Parse the '> < =='
+static Node* parseExpression(Token* tokens, int* currentIndex){
+  
+}
+
+static Node* parseIf(Token* tokens, int* currentIndex){
+  Node* node = calloc(1, sizeof(Node));
+  if(!node){
+    fprintf(stderr, "[-] Can't allocate parseIf \n");
+    exit(1);
+  }
+
+  node->type = TOKEN_IF;
+
+  if(tokens[(*currentIndex + 1)].type != TOKEN_LPAREN){
+    fprintf(stderr, "[-] Wrong syntax expected '(' afet 'if' \n");
+    exit(1);
+  }
+
+  *currentIndex += 2;
+  node->lnode = parseExpression(tokens, currentIndex);
+
+  if(tokens[*currentIndex].type != TOKEN_RPAREN){
+    fprintf(stderr, "[-] Wrong syntax expected ')' afet 'if' \n");
+    exit(1);
+  }
+  (*currentIndex)++;
+
+  if(tokens[*currentIndex].type != TOKEN_LBRACE){
+    fprintf(stderr, "[-] Wrong syntax expected '{' afet 'if()' \n");
+    exit(1);
+  }
+  (*currentIndex)++;
+
+  Node* thenBody = calloc(1, sizeof(Node));
+  thenBody->type = NO_BODY;
+  Node* thenLast = NULL;
+
+  //TODO: Define all the node
+  while (tokens[*currentIndex].type != TOKEN_RBRACE && tokens[*currentIndex].type != TOKEN_OEF)  {
+
+  }
+
+}
 
 static Node* transformIntoNode(Token* tokens, int* currentIndex){
   Node* node = calloc(1, sizeof(Node));
@@ -8,7 +52,14 @@ static Node* transformIntoNode(Token* tokens, int* currentIndex){
     exit(1);
   }
 
-  //Int not init
+  //If
+  if(tokens[*currentIndex].type == TOKEN_IDENTIFIER && strcmp(tokens[*currentIndex].value, "if") == 0){
+    printf("[+] Found if \n");
+    parseIf(tokens, currentIndex);
+
+  }
+
+  //Int & not init
   if(tokens[*currentIndex].type == TOKEN_INT && strcmp(tokens[*currentIndex].value, "int") == 0){ 
 
     if(tokens[(*currentIndex) + 1].type == TOKEN_IDENTIFIER){
@@ -37,6 +88,16 @@ static Node* transformIntoNode(Token* tokens, int* currentIndex){
 
     }
   }
+
+  //Major
+  //if(tokens[(*currentIndex + 1)].type == TOKEN_MAJOR){
+  //  if((tokens[(*currentIndex)].type == TOKEN_IDENTIFIER || tokens[(*currentIndex)].type == TOKEN_INT) &&
+  //      (tokens[(*currentIndex + 2)].type == TOKEN_IDENTIFIER || tokens[(*currentIndex)].type == TOKEN_INT)){
+  //    printf("Found -------------------- \n");
+  //  }
+  //}
+
+ 
 
   //Return
   if(tokens[*currentIndex].type == TOKEN_IDENTIFIER && strcmp(tokens[*currentIndex].value, "return") == 0){
@@ -79,7 +140,6 @@ Function* getFunctionByName(char* name, FunctionList funList){
   }
   return NULL;
 }
-
 
 // Create function
 Function parseFunction(Token* tokens, int* currentIndex){
