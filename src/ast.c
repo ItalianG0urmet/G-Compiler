@@ -1,50 +1,13 @@
 #include "../include/ast.h"
 
-//TODO: Parse the '> < =='
+// -- Parse the symbols of and expression --
 static Node* parseExpression(Token* tokens, int* currentIndex){
-  
+  //TODO: Create expression parser    
 }
 
-static Node* parseIf(Token* tokens, int* currentIndex){
-  Node* node = calloc(1, sizeof(Node));
-  if(!node){
-    fprintf(stderr, "[-] Can't allocate parseIf \n");
-    exit(1);
-  }
+static Node* parseIf(Token* tokens, int* currentIndex);
 
-  node->type = TOKEN_IF;
-
-  if(tokens[(*currentIndex + 1)].type != TOKEN_LPAREN){
-    fprintf(stderr, "[-] Wrong syntax expected '(' afet 'if' \n");
-    exit(1);
-  }
-
-  *currentIndex += 2;
-  node->lnode = parseExpression(tokens, currentIndex);
-
-  if(tokens[*currentIndex].type != TOKEN_RPAREN){
-    fprintf(stderr, "[-] Wrong syntax expected ')' afet 'if' \n");
-    exit(1);
-  }
-  (*currentIndex)++;
-
-  if(tokens[*currentIndex].type != TOKEN_LBRACE){
-    fprintf(stderr, "[-] Wrong syntax expected '{' afet 'if()' \n");
-    exit(1);
-  }
-  (*currentIndex)++;
-
-  Node* thenBody = calloc(1, sizeof(Node));
-  thenBody->type = NO_BODY;
-  Node* thenLast = NULL;
-
-  //TODO: Define all the node
-  while (tokens[*currentIndex].type != TOKEN_RBRACE && tokens[*currentIndex].type != TOKEN_OEF)  {
-
-  }
-
-}
-
+// -- Transfrom some tokens into node --
 static Node* transformIntoNode(Token* tokens, int* currentIndex){
   Node* node = calloc(1, sizeof(Node));
   if(!node){
@@ -131,6 +94,62 @@ static Node* transformIntoNode(Token* tokens, int* currentIndex){
 
 }
 
+// -- Parse the if statment
+static Node* parseIf(Token* tokens, int* currentIndex){
+  Node* node = calloc(1, sizeof(Node));
+  if(!node){
+    fprintf(stderr, "[-] Can't allocate parseIf \n");
+    exit(1);
+  }
+
+  node->type = TOKEN_IDENTIFIER;
+
+  if(tokens[(*currentIndex + 1)].type != TOKEN_LPAREN){
+    fprintf(stderr, "[-] Wrong syntax expected '(' afet 'if' but found '%s' \n", tokens[(*currentIndex + 1)].value);
+    exit(1);
+  }
+
+  *currentIndex += 2;
+  node->lnode = parseExpression(tokens, currentIndex);
+
+  if(tokens[*currentIndex].type != TOKEN_RPAREN){
+    fprintf(stderr, "[-] Wrong syntax expected ')' afet 'if' but found '%s' \n", tokens[*currentIndex].value);
+    exit(1);
+  }
+  (*currentIndex)++;
+
+  if(tokens[*currentIndex].type != TOKEN_LBRACE){
+    fprintf(stderr, "[-] Wrong syntax expected '{' afet 'if()' \n");
+    exit(1);
+  }
+  (*currentIndex)++;
+
+  Node* thenBody = calloc(1, sizeof(Node));
+  thenBody->type = NO_BODY;
+  Node* thenLast = NULL;
+
+  // Creating all the nodes
+  while (tokens[*currentIndex].type != TOKEN_RBRACE && tokens[*currentIndex].type != TOKEN_OEF)  {
+
+    Node* stmt = transformIntoNode(tokens, currentIndex);
+    if(!thenBody->body){
+      thenBody->body = stmt;
+    } else {
+      thenLast->next = stmt;
+    }
+    thenLast = stmt;
+  }
+
+  if (tokens[*currentIndex].type != TOKEN_RBRACE) {
+    fprintf(stderr, "[-] Expected '}' to close if body\n");
+    exit(1);
+  }
+  (*currentIndex)++;
+
+  node->then = thenBody;
+
+}
+
 //Get function by name
 Function* getFunctionByName(char* name, FunctionList funList){
   for(int i = 0; i < funList.count; i++){
@@ -152,7 +171,6 @@ Function parseFunction(Token* tokens, int* currentIndex){
     case TOKEN_FLOAT: returnType = RET_FLOAT; break;
     default: fprintf(stderr, "[-] Can't find return type of %s\n", identifier.value); exit(1);
   }
-  printf("--------------- %d \n", returnType);
   Argument* args = parseParam(tokens, *currentIndex, *currentIndex + 3);
 
   while(tokens[*currentIndex].type == TOKEN_LBRACE){
