@@ -1,34 +1,39 @@
 #include "../include/tokenizer.h"
 
+// -- Assign the right token --
 Token firstToken(char buffer[256], char current) {
 
-    Token temp;
-    if (strcmp(buffer, "int") == 0) {
-        temp.type = TOKEN_INT;
-    } else if (strcmp(buffer, "float") == 0) {
-        temp.type = TOKEN_FLOAT;
-    } else if (strcmp(buffer, "void") == 0) {
-        temp.type = TOKEN_VOID;
-    } else {
-        bool isNumeric = true;
-        for (int i = 0; buffer[i] != '\0'; i++) {
-            if (!isdigit(buffer[i])) {
-                isNumeric = false;
-                break;
-            }
-        }
+  Token temp;
+  if (strcmp(buffer, "int") == 0) {
+    temp.type = TOKEN_INT;
 
-        if (isNumeric) {
-            temp.type = TOKEN_INT;
-        } else {
-            temp.type = TOKEN_IDENTIFIER;
-        }
+  } else if (strcmp(buffer, "float") == 0) {
+    temp.type = TOKEN_FLOAT;
+
+  } else if (strcmp(buffer, "void") == 0) {
+    temp.type = TOKEN_VOID;
+
+  } else {
+    bool isNumeric = true;
+    for (int i = 0; buffer[i] != '\0'; i++) {
+      if (!isdigit(buffer[i])) {
+        isNumeric = false;
+        break;
+      }
     }
 
-    strcpy(temp.value, buffer);
-    return temp;
+    if (isNumeric) {
+      temp.type = TOKEN_INT;
+    } else {
+      temp.type = TOKEN_IDENTIFIER;
+    }
+  }
+
+  strcpy(temp.value, buffer);
+  return temp;
 }
 
+// -- Allocate the token in the list --
 void tokenPush(Token** tokens, Token* token, int* tokens_capacity, int *tokens_count){
 
   if(*tokens_count >= *tokens_capacity){
@@ -43,6 +48,8 @@ void tokenPush(Token** tokens, Token* token, int* tokens_capacity, int *tokens_c
   (*tokens)[*tokens_count] = *token;
   (*tokens_count)++;
 }
+
+// -- Translate the toke type to a string --
 static const char* tokenTypeToString(TokenType type) {
     switch(type) {
         case TOKEN_TEXT: return "TEXT";
@@ -63,6 +70,7 @@ static const char* tokenTypeToString(TokenType type) {
     }
 }
 
+// -- Main function of the token class --
 Token* tokenizer(FILE* file){
     int tokens_capacity = 16;
     int tokens_count = 0;
@@ -74,7 +82,6 @@ Token* tokenizer(FILE* file){
 
     int current;
     while((current = fgetc(file)) != EOF){
-
 
         // -- TEXT  --
         if (current == '"') {
@@ -168,7 +175,7 @@ Token* tokenizer(FILE* file){
     tokenPush(&tokens, &finish, &tokens_capacity, &tokens_count);
 
     // Print all tokens
-    printf("\n--- FINAL TOKENS ---\n");
+    printf("------- FINAL TOKENS -------\n");
     for (int i = 0; i < tokens_count; i++) {
         printf("[%02d] %s, %s\n", i, tokens[i].value, tokenTypeToString(tokens[i].type));
     }

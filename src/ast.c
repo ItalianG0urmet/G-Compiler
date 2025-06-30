@@ -52,16 +52,6 @@ static Node* transformIntoNode(Token* tokens, int* currentIndex){
     }
   }
 
-  //Major
-  //if(tokens[(*currentIndex + 1)].type == TOKEN_MAJOR){
-  //  if((tokens[(*currentIndex)].type == TOKEN_IDENTIFIER || tokens[(*currentIndex)].type == TOKEN_INT) &&
-  //      (tokens[(*currentIndex + 2)].type == TOKEN_IDENTIFIER || tokens[(*currentIndex)].type == TOKEN_INT)){
-  //    printf("Found -------------------- \n");
-  //  }
-  //}
-
- 
-
   //Return
   if(tokens[*currentIndex].type == TOKEN_IDENTIFIER && strcmp(tokens[*currentIndex].value, "return") == 0){
     if (tokens[(*currentIndex) + 1].type == TOKEN_INT && strcmp(tokens[(*currentIndex) + 1].value, "int") != 0){
@@ -104,6 +94,7 @@ static Node* parseIf(Token* tokens, int* currentIndex){
 
   node->type = TOKEN_IDENTIFIER;
 
+  // Syntax check
   if(tokens[(*currentIndex + 1)].type != TOKEN_LPAREN){
     fprintf(stderr, "[-] Wrong syntax expected '(' afet 'if' but found '%s' \n", tokens[(*currentIndex + 1)].value);
     exit(1);
@@ -124,11 +115,10 @@ static Node* parseIf(Token* tokens, int* currentIndex){
   }
   (*currentIndex)++;
 
+  // Generate all the nodes
   Node* thenBody = calloc(1, sizeof(Node));
   thenBody->type = NO_BODY;
   Node* thenLast = NULL;
-
-  // Creating all the nodes
   while (tokens[*currentIndex].type != TOKEN_RBRACE && tokens[*currentIndex].type != TOKEN_OEF)  {
 
     Node* stmt = transformIntoNode(tokens, currentIndex);
@@ -140,17 +130,19 @@ static Node* parseIf(Token* tokens, int* currentIndex){
     thenLast = stmt;
   }
 
+  // Syntax check
   if (tokens[*currentIndex].type != TOKEN_RBRACE) {
     fprintf(stderr, "[-] Expected '}' to close if body\n");
     exit(1);
   }
   (*currentIndex)++;
 
+  // Attach
   node->then = thenBody;
 
 }
 
-//Get function by name
+// -- Get a function by name --
 Function* getFunctionByName(char* name, FunctionList funList){
   for(int i = 0; i < funList.count; i++){
     if (strcmp(funList.functions[i]->name, name) == 0) {
@@ -160,9 +152,12 @@ Function* getFunctionByName(char* name, FunctionList funList){
   return NULL;
 }
 
-// Create function
+// -- Create a function --
 Function parseFunction(Token* tokens, int* currentIndex){
+
   Token identifier = tokens[*currentIndex+1];
+
+  // Find return type
   FunReturnType returnType;
   switch(tokens[*currentIndex].type){
     case TOKEN_VOID: returnType = RET_VOID; break;
@@ -171,8 +166,9 @@ Function parseFunction(Token* tokens, int* currentIndex){
     case TOKEN_FLOAT: returnType = RET_FLOAT; break;
     default: fprintf(stderr, "[-] Can't find return type of %s\n", identifier.value); exit(1);
   }
-  Argument* args = parseParam(tokens, *currentIndex, *currentIndex + 3);
 
+  //Parse the args and define 
+  Argument* args = parseParam(tokens, *currentIndex, *currentIndex + 3);
   while(tokens[*currentIndex].type == TOKEN_LBRACE){
     (*currentIndex)++;
   }
@@ -195,7 +191,6 @@ Function parseFunction(Token* tokens, int* currentIndex){
   //Start node transformation
   Node* body = calloc(1, sizeof(Node));
   body->type = NO_BODY;
-
   Node* last = NULL;
   int nodeCount = 0;
   printf("\n[+] Defining function %s [+]\n", fun.name);

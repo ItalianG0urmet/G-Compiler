@@ -61,7 +61,8 @@ void generateFunctionIR(Function* fun, LLVMContextRef* context, LLVMModuleRef* m
         break;
 
       default:
-        printf("[P] None\n");
+        printf("[P] Can't generate the IR for the function %s\n", fun->name);
+        exit(1);
         break;
     }
     node = node->next;
@@ -83,7 +84,7 @@ int main(int argc, char* argv[]) {
 
   // -- AST --
   // Make FunctionList
-  printf("------ Instructions -------\n");
+  printf("------ Instructions -------");
   FunctionList functionList = { .functions = NULL, .count = 0 };
   int currentIndex = 0;
   while(tokens[currentIndex].type != TOKEN_OEF){
@@ -100,15 +101,13 @@ int main(int argc, char* argv[]) {
     }
   }
 
-  //Debug
+  // Debug
   for(int i = 0; functionList.count > i; i++){
     Function* fun = functionList.functions[i];
-    printf("[*] Name: %s \n", fun->name);
-  }
+    printf("[~] Defined functions: %s \n", fun->name); }
 
   // -- LLVM -- 
-
-  //Init LLVM IR convertion
+  // Init LLVM IR convertion
   LLVMContextRef context = LLVMContextCreate();
   LLVMModuleRef module = LLVMModuleCreateWithName("module");
   Function* mainFun = getFunctionByName("main", functionList);
@@ -117,16 +116,19 @@ int main(int argc, char* argv[]) {
     exit(1);
   }
 
+  // Print the generated code
   printf("------ IR Generation -------\n");
   generateFunctionIR(mainFun, &context, &module);
   char* ir = LLVMPrintModuleToString(module);
   printf("Generated IR:\n%s\n", ir);
+  printf("----------------------------\n");
   LLVMDisposeMessage(ir);
 
   LLVMInitializeNativeTarget();
   LLVMInitializeNativeAsmPrinter();
   LLVMInitializeNativeAsmParser();
 
+  // Create Object file
   char* error = NULL;
   if (LLVMTargetMachineEmitToFile(
     LLVMCreateTargetMachine(
@@ -148,7 +150,7 @@ int main(int argc, char* argv[]) {
     return 1;
   }
 
-  // Link
+  // Link the object file
   printf("[+] Linking to create executable...\n");
   int linkResult = system("clang output.o -o output");
   if (linkResult != 0) {
