@@ -29,7 +29,10 @@ llvm_map_components_to_libnames(llvm_libs
 )
 
 # Enable debug and disable optimization for clean debug
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0 -Wall") 
+option(DEBUG "Apply the -f -O0 -Wall" OFF)
+if(DEBUG)
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0 -Wall") 
+endif()
 
 # Base
 file(GLOB SOURCE "src/*.c")
