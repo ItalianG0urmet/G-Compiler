@@ -52,6 +52,10 @@ void tokenPush(Token** tokens, Token* token, int* tokens_capacity, int *tokens_c
 // -- Translate the toke type to a string --
 static const char* tokenTypeToString(TokenType type) {
     switch(type) {
+        case TOKEN_MAJOR: return "MAJOR";
+        case TOKEN_MINOR: return "MINOR";
+        case TOKEN_AND: return "AND";
+        case TOKEN_BITWISE_AND: return "&";
         case TOKEN_TEXT: return "TEXT";
         case TOKEN_INT: return "INT";
         case TOKEN_FLOAT: return "FLOAT";
@@ -80,6 +84,7 @@ Token* tokenizer(FILE* file){
     int count = 0;
     buffer[0] = '\0';
 
+    int last;
     int current;
     while((current = fgetc(file)) != EOF){
 
@@ -97,6 +102,7 @@ Token* tokenizer(FILE* file){
             temp.value[i] = '\0';
 
             tokenPush(&tokens, &temp, &tokens_capacity, &tokens_count);
+            last = current;
             continue;
         }
 
@@ -109,6 +115,7 @@ Token* tokenizer(FILE* file){
                 count = 0;
                 buffer[0] = '\0';
             }
+            last = current;
             continue;
         }
 
@@ -117,6 +124,7 @@ Token* tokenizer(FILE* file){
             if (count < sizeof(buffer) - 1) {
                 buffer[count++] = (char)current;
             }
+            last = current;
             continue;
         }
 
@@ -125,11 +133,12 @@ Token* tokenizer(FILE* file){
             if (count < sizeof(buffer) - 1) {
                 buffer[count++] = (char)current;
             }
+            last = current;
             continue;
         }
 
         // -- Symbols --
-        if (strchr("=,;{}()><", current)) {
+        if (strchr("=,;{}()>&<", current)) {
             if (count > 0) {
                 buffer[count] = '\0';
                 Token temp = firstToken(buffer, current);
@@ -149,14 +158,36 @@ Token* tokenizer(FILE* file){
                 case ')': temp.type = TOKEN_RPAREN; break;
                 case '{': temp.type = TOKEN_LBRACE; break;
                 case '}': temp.type = TOKEN_RBRACE; break;
+                case '&': {
+                            int next = fgetc(file);
+                            if(next == '&'){
+                              temp.type = TOKEN_AND;
+                              temp.value[0] = '&';
+                              temp.value[1] = '&';
+                              temp.value[2] = '\0';
+                            } else {
+                              temp.type = TOKEN_BITWISE_AND;
+                              temp.value[0] = '&';
+                              temp.value[1] = '\0';
+                              ungetc(next, file);
+                            }
+                          }
+                          break;
                 default:  temp.type = TOKEN_IDENTIFIER; break;
             }
-            temp.value[0] = (char)current;
-            temp.value[1] = '\0';
+
+            if (current != '&') {
+              temp.value[0] = (char)current;
+              temp.value[1] = '\0';
+            }
 
             tokenPush(&tokens, &temp, &tokens_capacity, &tokens_count);
+            last = current;
             continue;
         }
+
+        fprintf(stderr, "[-] Invalid syntaxt %c \n", current);
+        exit(1);
 
     }
 

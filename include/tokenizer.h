@@ -14,9 +14,11 @@ typedef enum {
   TOKEN_CHAR,       // char
   TOKEN_IDENTIFIER, //identifier
   TOKEN_EQUAL,      // ==
-  TOKEN_AND,        // &&
   TOKEN_MAJOR,      // >
   TOKEN_MINOR,      // <
+  TOKEN_AND,        // &&
+  TOKEN_BITWISE_AND,// &
+  TOKEN_POINTER,    // *
   TOKEN_ASSIGN,     // = 
   TOKEN_LPAREN,     // (
   TOKEN_RPAREN,     // )
