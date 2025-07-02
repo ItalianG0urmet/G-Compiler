@@ -3,6 +3,9 @@
 // -- Parse the symbols of and expression --
 static Node* parseExpression(Token* tokens, int* currentIndex){
   //TODO: Create expression parser    
+  if(tokens[(*currentIndex + 1)].type != TOKEN_LPAREN){
+    // Ora controllo se e' un int char o altro
+  }
 }
 
 static Node* parseIf(Token* tokens, int* currentIndex);
@@ -79,9 +82,7 @@ static Node* transformIntoNode(Token* tokens, int* currentIndex){
   }
 
   fprintf(stderr, "[-] Unknown or unsupported token at index %d (type=%d, value='%s')\n", *currentIndex, tokens[*currentIndex].type, tokens[*currentIndex].value);
-  (*currentIndex)++;
-  return node;
-
+  exit(1);
 }
 
 // -- Parse the if statment

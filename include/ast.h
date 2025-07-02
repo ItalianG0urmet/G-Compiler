@@ -20,20 +20,25 @@ typedef struct {
 
 typedef enum {
   NO_BODY,     
+
   NO_ADD,    
   NO_SUB,
   NO_MUL,
   NO_DIV,
+
   NO_ASSIGN_INT,
   NO_ASSIGN_FLOAT,
   NO_ASSIGN_CHAR,
+
   NO_PRINT,
   NO_RETURN,
   NO_ASM,
+
   NO_IF,
   NO_MAJOR,  
   NO_MINOR,
   NO_EQUAL_TO,
+
   NO_WHILE,
   NO_FOR,
   NO_FUNCALL
