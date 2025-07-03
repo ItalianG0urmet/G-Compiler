@@ -4,90 +4,85 @@
 #include <tokenizer.h>
 
 typedef enum {
-  ARG_INT,
-  ARG_FLOAT,
-  ARG_CHAR,
+    ARG_INT,
+    ARG_FLOAT,
+    ARG_CHAR,
 } ArgumentType;
 
 typedef struct {
-  ArgumentType type;
-  union {
-    int   i;
-    float f;
-    char  str;
-  };
+    ArgumentType type;
+    union {
+        int   i;
+        float f;
+        char  str;
+    };
 } Argument;
 
 typedef enum {
-  NO_BODY,     
+    NO_BODY,
 
-  NO_ADD,    
-  NO_SUB,
-  NO_MUL,
-  NO_DIV,
+    NO_ADD,
+    NO_SUB,
+    NO_MUL,
+    NO_DIV,
 
-  NO_ASSIGN_INT,
-  NO_ASSIGN_FLOAT,
-  NO_ASSIGN_CHAR,
+    NO_ASSIGN_INT,
+    NO_ASSIGN_FLOAT,
+    NO_ASSIGN_CHAR,
 
-  NO_PRINT,
-  NO_RETURN,
-  NO_ASM,
+    NO_PRINT,
+    NO_RETURN,
+    NO_ASM,
 
-  NO_IF,
-  NO_MAJOR,  
-  NO_MINOR,
-  NO_EQUAL_TO,
+    NO_IF,
+    NO_MAJOR,
+    NO_MINOR,
+    NO_EQUAL_TO,
 
-  NO_WHILE,
-  NO_FOR,
-  NO_FUNCALL
+    NO_WHILE,
+    NO_FOR,
+    NO_FUNCALL
 } NodeType;
 
 typedef struct Node Node;
 
 struct Node {
-  NodeType type;
-  Node*    lnode;
-  Node*    rnode;
+    NodeType type;
+    Node* lnode;
+    Node* rnode;
 
-  Node*    code; // IF, FOR
-  Node*    then; // IF or FOR body
-  Node*    els; // ELSE
-  Node*    init; // INIT FOR
-  Node*    inc; // INCREMENT FOR
+    Node* code;  // IF, FOR
+    Node* then;  // IF or FOR body
+    Node* els;   // ELSE
+    Node* init;  // INIT FOR
+    Node* inc;   // INCREMENT FOR
 
-  Node*    body; // Point to the first node
-  Node*    next; // Point to the next node
+    Node* body;  // Point to the first node
+    Node* next;  // Point to the next node
 
-  char     name[256]; //Name of var or Name of text
-  int      number; // only for NO_NUM or NO_RETURN
-  char     str; // only for NO_CHAR
+    char name[256];  // Name of var or Name of text
+    int  number;      // only for NO_NUM or NO_RETURN
+    char str;        // only for NO_CHAR
 };
 
-typedef enum {
-  RET_INT,
-  RET_CHAR,
-  RET_FLOAT,
-  RET_VOID
-} FunReturnType;
+typedef enum { RET_INT, RET_CHAR, RET_FLOAT, RET_VOID } FunReturnType;
 
 typedef struct {
-  FunReturnType returnType;
-  Node*     body;
-  int       nodeCount;
-  Argument* arguments;
-  char      name[256];
+    FunReturnType returnType;
+    Node*         body;
+    int           nodeCount;
+    Argument*     arguments;
+    char          name[256];
 } Function;
 
 typedef struct {
-  Function** functions;
-  int        count;
+    Function** functions;
+    int        count;
 } FunctionList;
 
 Function* getFunctionByName(char* name, FunctionList funList);
 Argument* parseParam(Token* tokens, int currentIndex, int firstParamIndex);
-Function  parseFunction(Token* tokens, int* currentIndex);
-void      addFunctionToList(Function* fun, FunctionList* functionList);
+Function parseFunction(Token* tokens, int* currentIndex);
+void addFunctionToList(Function* fun, FunctionList* functionList);
 
 #endif
