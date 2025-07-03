@@ -1,7 +1,7 @@
 #include "../include/tokenizer.h"
 
 // -- Assign the right token --
-Token firstToken(char buffer[256], char current) {
+static Token firstToken(const char buffer[256], char current) {
     Token temp;
     if (strcmp(buffer, "int") == 0) {
         temp.type = TOKEN_INT;
@@ -33,7 +33,7 @@ Token firstToken(char buffer[256], char current) {
 }
 
 // -- Allocate the token in the list --
-void tokenPush(Token** tokens, Token* token, int* tokens_capacity,
+static void tokenPush(Token** tokens, const Token* token, int* tokens_capacity,
                int* tokens_count) {
     if (*tokens_count >= *tokens_capacity) {
         *tokens_capacity *= 2;
@@ -50,7 +50,7 @@ void tokenPush(Token** tokens, Token* token, int* tokens_capacity,
 }
 
 // -- Translate the toke type to a string --
-static const char* tokenTypeToString(TokenType type) {
+static const char* tokenTypeToString(const TokenType type) {
     switch (type) {
         case TOKEN_MAJOR:
             return "MAJOR";
@@ -98,6 +98,10 @@ Token* tokenizer(FILE* file) {
     int tokens_capacity = 16;
     int tokens_count = 0;
     Token* tokens = malloc(sizeof(Token) * tokens_capacity);
+    if(tokens == NULL){
+        fprintf(stderr, "[-] Can't allocate memory for token");
+        exit(1);
+    }
 
     char buffer[256];
     int count = 0;

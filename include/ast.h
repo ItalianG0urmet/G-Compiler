@@ -80,9 +80,9 @@ typedef struct {
     int        count;
 } FunctionList;
 
-Function* getFunctionByName(char* name, FunctionList funList);
-Argument* parseParam(Token* tokens, int currentIndex, int firstParamIndex);
-Function parseFunction(Token* tokens, int* currentIndex);
+Function* getFunctionByName(const char* name, const FunctionList funList);
+Argument* parseParam(const Token* tokens, int currentIndex, const int firstParamIndex);
+Function parseFunction(const Token* tokens, int* currentIndex);
 void addFunctionToList(Function* fun, FunctionList* functionList);
 
 #endif

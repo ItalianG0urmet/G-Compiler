@@ -10,7 +10,7 @@
 #include "../include/llvm.h"
 #include "../include/tokenizer.h"
 
-int main(int argc, char* argv[]) {
+int main(int argc, const char* argv[]) {
     // -- Tokenizer --
     FILE* file = fopen(argv[1], "r");
     if (!file) {
@@ -37,6 +37,10 @@ int main(int argc, char* argv[]) {
             tokens[currentIndex + 1].type == TOKEN_IDENTIFIER &&
             tokens[currentIndex + 2].type == TOKEN_LPAREN) {
             Function* fun = malloc(sizeof(Function));
+            if(fun == NULL){
+                fprintf(stderr, "[-] Can't allocate memory \n");
+                exit(1);
+            }
             *fun = parseFunction(tokens, &currentIndex);
             addFunctionToList(fun, &functionList);
         } else {
@@ -46,7 +50,7 @@ int main(int argc, char* argv[]) {
 
     // Debug
     for (int i = 0; functionList.count > i; i++) {
-        Function* fun = functionList.functions[i];
+        const Function* fun = functionList.functions[i];
         printf("[~] Defined functions: %s \n", fun->name);
     }
 

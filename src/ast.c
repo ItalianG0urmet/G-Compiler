@@ -1,22 +1,26 @@
 #include "../include/ast.h"
 
-// -- Parse the symbols of and expression --
-static Node* parseExpression(Token* tokens, int* currentIndex) {
-    // TODO: Create expression parser
-    if (tokens[(*currentIndex + 1)].type != TOKEN_LPAREN) {
-        printf("Qua si puo andare \n");
+static inline void checkIfAllocated(const void* ptr){
+    if(ptr == NULL){
+        fprintf(stderr, "[-] Failed to allocate memory \n");
+        exit(1);
     }
 }
 
-static Node* parseIf(Token* tokens, int* currentIndex);
+// -- Parse the symbols of and expression --
+static Node* parseExpression(const Token* tokens, int* currentIndex) {
+    // TODO: Create expression parser
+    if (tokens[(*currentIndex + 1)].type != TOKEN_LPAREN) {
+
+    }
+}
+
+static Node* parseIf(const Token* tokens, int* currentIndex);
 
 // -- Transfrom some tokens into node --
-static Node* transformIntoNode(Token* tokens, int* currentIndex) {
+static Node* transformIntoNode(const Token* tokens, int* currentIndex) {
     Node* node = calloc(1, sizeof(Node));
-    if (!node) {
-        fprintf(stderr, "[-] Failed token malloc \n");
-        exit(1);
-    }
+    checkIfAllocated(node);
 
     // If
     if (tokens[*currentIndex].type == TOKEN_IDENTIFIER &&
@@ -94,12 +98,9 @@ static Node* transformIntoNode(Token* tokens, int* currentIndex) {
 }
 
 // -- Parse the if statment
-static Node* parseIf(Token* tokens, int* currentIndex) {
+static Node* parseIf(const Token* tokens, int* currentIndex) {
     Node* node = calloc(1, sizeof(Node));
-    if (!node) {
-        fprintf(stderr, "[-] Can't allocate parseIf \n");
-        exit(1);
-    }
+    checkIfAllocated(node);
 
     node->type = TOKEN_IDENTIFIER;
 
@@ -130,6 +131,7 @@ static Node* parseIf(Token* tokens, int* currentIndex) {
 
     // Generate all the nodes
     Node* thenBody = calloc(1, sizeof(Node));
+    checkIfAllocated(thenBody);
     thenBody->type = NO_BODY;
     Node* thenLast = NULL;
     while (tokens[*currentIndex].type != TOKEN_RBRACE &&
@@ -155,7 +157,7 @@ static Node* parseIf(Token* tokens, int* currentIndex) {
 }
 
 // -- Get a function by name --
-Function* getFunctionByName(char* name, FunctionList funList) {
+Function* getFunctionByName(const char* name, const FunctionList funList) {
     for (int i = 0; i < funList.count; i++) {
         if (strcmp(funList.functions[i]->name, name) == 0) {
             return funList.functions[i];
@@ -165,7 +167,7 @@ Function* getFunctionByName(char* name, FunctionList funList) {
 }
 
 // -- Create a function --
-Function parseFunction(Token* tokens, int* currentIndex) {
+Function parseFunction(const Token* tokens, int* currentIndex) {
     Token identifier = tokens[*currentIndex + 1];
 
     // Find return type
@@ -197,6 +199,7 @@ Function parseFunction(Token* tokens, int* currentIndex) {
 
     Function fun;
     fun.arguments = args;
+    fun.returnType = returnType;
 
     if (identifier.type != TOKEN_IDENTIFIER) {
         fprintf(stderr, "[-] Invalid function identifier\n");
@@ -212,6 +215,7 @@ Function parseFunction(Token* tokens, int* currentIndex) {
 
     // Start node transformation
     Node* body = calloc(1, sizeof(Node));
+    checkIfAllocated(body);
     body->type = NO_BODY;
     Node* last = NULL;
     int nodeCount = 0;
@@ -248,7 +252,7 @@ Function parseFunction(Token* tokens, int* currentIndex) {
 }
 
 // Get args for function
-Argument* parseParam(Token* tokens, int currentIndex, int firstParamIndex) {
+Argument* parseParam(const Token* tokens, int currentIndex, const int firstParamIndex) {
     int index = firstParamIndex;
     int argCount = 0;
 
@@ -267,10 +271,7 @@ Argument* parseParam(Token* tokens, int currentIndex, int firstParamIndex) {
     }
 
     Argument* arguments = calloc(argCount, sizeof(Argument));
-    if (!arguments) {
-        fprintf(stderr, "[-] Can't allocate memory for args\n");
-        exit(1);
-    }
+    checkIfAllocated(arguments);
 
     index = firstParamIndex;
     int argIndex = 0;

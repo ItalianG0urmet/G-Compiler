@@ -34,8 +34,6 @@ typedef struct {
     char      value[256];
 } Token;
 
-Token firstToken(char buffer[256], char current);
-void tokenPush(Token** tokens, Token* token, int* tokens_capacity, int* tokens_count);
 Token* tokenizer(FILE* file);
 
 #endif
