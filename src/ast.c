@@ -1,7 +1,7 @@
 #include "../include/ast.h"
 
-static inline void checkIfAllocated(const void* ptr){
-    if(ptr == NULL){
+static inline void checkIfAllocated(const void* ptr) {
+    if (ptr == NULL) {
         fprintf(stderr, "[-] Failed to allocate memory \n");
         exit(1);
     }
@@ -11,7 +11,6 @@ static inline void checkIfAllocated(const void* ptr){
 static Node* parseExpression(const Token* tokens, int* currentIndex) {
     // TODO: Create expression parser
     if (tokens[(*currentIndex + 1)].type != TOKEN_LPAREN) {
-
     }
 }
 
@@ -26,7 +25,8 @@ static Node* transformIntoNode(const Token* tokens, int* currentIndex) {
     if (tokens[*currentIndex].type == TOKEN_IDENTIFIER &&
         strcmp(tokens[*currentIndex].value, "if") == 0) {
         printf("[+] Found if \n");
-        parseIf(tokens, currentIndex);
+        node = parseIf(tokens, currentIndex);
+        return node;
     }
 
     // Int & not init
@@ -154,6 +154,7 @@ static Node* parseIf(const Token* tokens, int* currentIndex) {
 
     // Attach
     node->then = thenBody;
+    return node;
 }
 
 // -- Get a function by name --
@@ -252,7 +253,8 @@ Function parseFunction(const Token* tokens, int* currentIndex) {
 }
 
 // Get args for function
-Argument* parseParam(const Token* tokens, int currentIndex, const int firstParamIndex) {
+Argument* parseParam(const Token* tokens, int currentIndex,
+                     const int firstParamIndex) {
     int index = firstParamIndex;
     int argCount = 0;
 
