@@ -1,5 +1,14 @@
 #include "../include/ast.h"
 
+// -- Syntax checking macro --
+#define EXPECT(tokenArr, index, expectedType, msg)                 \
+    if ((tokenArr)[index].type != expectedType) {                  \
+        fprintf(stderr, "[-] Syntax Error: %s. Found '%s'\n", msg, \
+                (tokenArr)[index].value);                          \
+        exit(1);                                                   \
+    }
+
+// -- Check if a ptr in allocated --
 static inline void checkIfAllocated(const void* ptr) {
     if (ptr == NULL) {
         fprintf(stderr, "[-] Failed to allocate memory \n");
@@ -7,7 +16,7 @@ static inline void checkIfAllocated(const void* ptr) {
     }
 }
 
-// -- Parse the symbols of and expression --
+// -- Parse the symbols and expression --
 static Node* parseExpression(const Token* tokens, int* currentIndex) {
     // TODO: Create expression parser
     if (tokens[(*currentIndex + 1)].type != TOKEN_LPAREN) {
@@ -105,28 +114,15 @@ static Node* parseIf(const Token* tokens, int* currentIndex) {
     node->type = TOKEN_IDENTIFIER;
 
     // Syntax check
-    if (tokens[(*currentIndex + 1)].type != TOKEN_LPAREN) {
-        fprintf(stderr,
-                "[-] Wrong syntax expected '(' afet 'if' but found '%s' \n",
-                tokens[(*currentIndex + 1)].value);
-        exit(1);
-    }
+    EXPECT(tokens, *currentIndex + 1, TOKEN_LPAREN, "expected '(' after 'if'")
 
     *currentIndex += 2;
     node->lnode = parseExpression(tokens, currentIndex);
 
-    if (tokens[*currentIndex].type != TOKEN_RPAREN) {
-        fprintf(stderr,
-                "[-] Wrong syntax expected ')' afet 'if' but found '%s' \n",
-                tokens[*currentIndex].value);
-        exit(1);
-    }
+    EXPECT(tokens, *currentIndex, TOKEN_RPAREN, "expected ')' after condition")
     (*currentIndex)++;
 
-    if (tokens[*currentIndex].type != TOKEN_LBRACE) {
-        fprintf(stderr, "[-] Wrong syntax expected '{' afet 'if()' \n");
-        exit(1);
-    }
+    EXPECT(tokens, *currentIndex, TOKEN_LBRACE, "expected '{' after if()")
     (*currentIndex)++;
 
     // Generate all the nodes
@@ -146,10 +142,7 @@ static Node* parseIf(const Token* tokens, int* currentIndex) {
     }
 
     // Syntax check
-    if (tokens[*currentIndex].type != TOKEN_RBRACE) {
-        fprintf(stderr, "[-] Expected '}' to close if body\n");
-        exit(1);
-    }
+    EXPECT(tokens, *currentIndex, TOKEN_RBRACE, "expected '}' to close if body")
     (*currentIndex)++;
 
     // Attach
@@ -202,10 +195,9 @@ Function parseFunction(const Token* tokens, int* currentIndex) {
     fun.arguments = args;
     fun.returnType = returnType;
 
-    if (identifier.type != TOKEN_IDENTIFIER) {
-        fprintf(stderr, "[-] Invalid function identifier\n");
-        exit(1);
-    }
+    EXPECT(tokens, *currentIndex + 1, TOKEN_IDENTIFIER,
+           "invalid function identifier")
+
     strncpy(fun.name, identifier.value, sizeof(fun.name));
 
     // Skip to {
