@@ -2,6 +2,14 @@
 cmake_minimum_required(VERSION 3.10)
 project(compiler)
 
+# Clang
+option(CLANG "Use Clang as the compiler" OFF)
+if(CLANG)
+  message(STATUS "Using Clang compiler")
+  set(CMAKE_C_COMPILER clang CACHE STRING "" FORCE)
+  set(CMAKE_CXX_COMPILER clang++ CACHE STRING "" FORCE)
+endif()
+
 # LLVM
 find_package(LLVM REQUIRED CONFIG)
 
