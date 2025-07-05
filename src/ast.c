@@ -9,9 +9,9 @@
     }
 
 // -- Check if a ptr in allocated --
-static inline void checkIfAllocated(const void* ptr) {
+static inline void checkIfAllocated(const void* ptr, int line) {
     if (ptr == NULL) {
-        fprintf(stderr, "[-] Failed to allocate memory \n");
+        fprintf(stderr, "[-] Failed to allocate memory, at line %d of %s\n", line, __FILE__);
         exit(1);
     }
 }
@@ -28,7 +28,7 @@ static Node* parseIf(const Token* tokens, int* currentIndex);
 // -- Transfrom some tokens into node --
 static Node* transformIntoNode(const Token* tokens, int* currentIndex) {
     Node* node = calloc(1, sizeof(Node));
-    checkIfAllocated(node);
+    checkIfAllocated(node, __LINE__);
 
     // If
     if (tokens[*currentIndex].type == TOKEN_IDENTIFIER &&
@@ -109,7 +109,7 @@ static Node* transformIntoNode(const Token* tokens, int* currentIndex) {
 // -- Parse the if statment
 static Node* parseIf(const Token* tokens, int* currentIndex) {
     Node* node = calloc(1, sizeof(Node));
-    checkIfAllocated(node);
+    checkIfAllocated(node, __LINE__);
 
     node->type = TOKEN_IDENTIFIER;
 
@@ -127,7 +127,7 @@ static Node* parseIf(const Token* tokens, int* currentIndex) {
 
     // Generate all the nodes
     Node* thenBody = calloc(1, sizeof(Node));
-    checkIfAllocated(thenBody);
+    checkIfAllocated(thenBody, __LINE__);
     thenBody->type = NO_BODY;
     Node* thenLast = NULL;
     while (tokens[*currentIndex].type != TOKEN_RBRACE &&
@@ -208,7 +208,7 @@ Function parseFunction(const Token* tokens, int* currentIndex) {
 
     // Start node transformation
     Node* body = calloc(1, sizeof(Node));
-    checkIfAllocated(body);
+    checkIfAllocated(body, __LINE__);
     body->type = NO_BODY;
     Node* last = NULL;
     int nodeCount = 0;
@@ -265,7 +265,7 @@ Argument* parseParam(const Token* tokens, int currentIndex,
     }
 
     Argument* arguments = calloc(argCount, sizeof(Argument));
-    checkIfAllocated(arguments);
+    checkIfAllocated(arguments, __LINE__);
 
     index = firstParamIndex;
     int argIndex = 0;
