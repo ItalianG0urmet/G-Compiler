@@ -61,7 +61,8 @@ struct Node {
     Node* next;  // Point to the next node
 
     char name[256];  // Name of var or Name of text
-    int  number;      // only for NO_NUM or NO_RETURN
+    char letter;     // Just for chars
+    int  number;     // only for NO_NUM or NO_RETURN
     char str;        // only for NO_CHAR
 };
 

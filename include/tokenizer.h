@@ -14,6 +14,7 @@ typedef enum {
     TOKEN_FLOAT,        // 0.0
     TOKEN_CHAR,         // char
     TOKEN_TEXT,         // "
+    TOKEN_LETTER,       // '
 
     TOKEN_NOT,          // !
     TOKEN_EQUAL,        // ==

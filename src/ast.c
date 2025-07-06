@@ -11,7 +11,8 @@
 // -- Check if a ptr in allocated --
 static inline void checkIfAllocated(const void* ptr, int line) {
     if (ptr == NULL) {
-        fprintf(stderr, "[-] Failed to allocate memory, at line %d of %s\n", line, __FILE__);
+        fprintf(stderr, "[-] Failed to allocate memory, at line %d of %s\n",
+                line, __FILE__);
         exit(1);
     }
 }
@@ -66,6 +67,33 @@ static Node* transformIntoNode(const Token* tokens, int* currentIndex) {
                 fprintf(stderr, "[-] Invalid var \n");
                 exit(1);
             }
+        }
+    }
+
+    // Char
+    if (tokens[*currentIndex].type == TOKEN_CHAR &&
+        tokens[(*currentIndex) + 1].type == TOKEN_IDENTIFIER) {
+        if (tokens[(*currentIndex) + 2].type == TOKEN_END) {
+            strncpy(node->name, tokens[(*currentIndex) + 1].value,
+                    sizeof(node->name));
+            node->type = NO_ASSIGN_CHAR;
+            printf("[+] Added not defined char named %s \n", node->name);
+            (*currentIndex) += 3;
+            return node;
+
+        } else if (tokens[(*currentIndex) + 2].type == TOKEN_ASSIGN &&
+                   tokens[(*currentIndex) + 3].type == TOKEN_LETTER) {
+            strncpy(node->name, tokens[(*currentIndex) + 1].value,
+                    sizeof(node->name));
+            node->type = NO_ASSIGN_CHAR;
+            node->letter = tokens[(*currentIndex) + 3].value[0];
+            printf("[+] Added defined char named %s with value '%c'\n",
+                   node->name, node->letter);
+            (*currentIndex) += 5;
+            return node;
+        } else {
+            fprintf(stderr, "[-] Syntax error in char definition\n");
+            exit(1);
         }
     }
 

@@ -3,12 +3,13 @@
 // -- Assign the right token --
 static Token firstToken(const char buffer[256], char current) {
     Token temp;
+
     if (strcmp(buffer, "int") == 0) {
         temp.type = TOKEN_INT;
-
+    } else if (strcmp(buffer, "char") == 0) {
+        temp.type = TOKEN_CHAR;
     } else if (strcmp(buffer, "float") == 0) {
         temp.type = TOKEN_FLOAT;
-
     } else if (strcmp(buffer, "void") == 0) {
         temp.type = TOKEN_VOID;
 
@@ -82,6 +83,8 @@ static const char* tokenTypeToString(const TokenType type) {
             return "CHAR";
         case TOKEN_VOID:
             return "VOID";
+        case TOKEN_LETTER:
+            return "LETTER";
         case TOKEN_IDENTIFIER:
             return "IDENTIFIER";
         case TOKEN_ASSIGN:
@@ -129,6 +132,24 @@ Token* tokenizer(FILE* file) {
 
             current = fgetc(file);
             while (current != '"' && current != EOF &&
+                   i < sizeof(temp.value) - 1) {
+                temp.value[i++] = (char)current;
+                current = fgetc(file);
+            }
+            temp.value[i] = '\0';
+
+            tokenPush(&tokens, &temp, &tokens_capacity, &tokens_count);
+            continue;
+        }
+
+        // -- Letter --
+        if (current == '\'') {
+            Token temp = {0};
+            temp.type = TOKEN_LETTER;
+            int i = 0;
+
+            current = fgetc(file);
+            while (current != '\'' && current != EOF &&
                    i < sizeof(temp.value) - 1) {
                 temp.value[i++] = (char)current;
                 current = fgetc(file);
