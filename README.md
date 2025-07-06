@@ -3,13 +3,7 @@
 ## **Description**
 
 This is a simple compiler for a custom-made language that I am creating. It will be a C-like language with some modern features.
-You may ask why this project? It's simple: I noticed how today's technology has spoiled us in the programming world, so my goal is to build this project using plain C++, without any IDE. I'm using Vim without autocomplete or error checking — just me and my code.
-
-## Update
-
-After some reflection, I’ve decided to migrate this project from C to C++. My expectations and goals have evolved, and I believe C++ will offer better tools and abstractions to accelerate development and maintainability. 
-From now on, I will gradually port existing code and new features to C++, while preserving the simplicity and performance focus of the original design.
-
+You may ask why this project? It's simple: I noticed how today's technology has spoiled us in the programming world, so my goal is to build this project using plain C, without any IDE. I'm using Vim without autocomplete or error checking — just me and my code.
 
 ## **Build & Run**
 
@@ -75,7 +69,6 @@ void main() {
 
 - [x] Basic tokenizer
 - [x] AST for variables/functions
-- [ ] Migrate to C++
 - [ ] Control flow (if/while)
 - [ ] Complex types (structs)
 - [ ] Memory management
