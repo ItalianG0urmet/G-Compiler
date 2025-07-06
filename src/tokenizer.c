@@ -34,7 +34,7 @@ static Token firstToken(const char buffer[256], char current) {
 
 // -- Allocate the token in the list --
 static void tokenPush(Token** tokens, const Token* token, int* tokens_capacity,
-               int* tokens_count) {
+                      int* tokens_count) {
     if (*tokens_count >= *tokens_capacity) {
         *tokens_capacity *= 2;
         Token* new_tokens =
@@ -52,14 +52,26 @@ static void tokenPush(Token** tokens, const Token* token, int* tokens_capacity,
 // -- Translate the toke type to a string --
 static const char* tokenTypeToString(const TokenType type) {
     switch (type) {
+        case TOKEN_BITWISE_AND:
+            return "BITWISE AND";
+        case TOKEN_AND:
+            return "AND";
+        case TOKEN_BITWISE_OR:
+            return "BITWISE OR";
+        case TOKEN_OR:
+            return "OR";
+        case TOKEN_EMINOR:
+            return "EMINOR";
+        case TOKEN_EMAJOR:
+            return "EMAJOR";
+        case TOKEN_NEQUAL:
+            return "NEQUAL";
+        case TOKEN_NOT:
+            return "NOT";
         case TOKEN_MAJOR:
             return "MAJOR";
         case TOKEN_MINOR:
             return "MINOR";
-        case TOKEN_AND:
-            return "AND";
-        case TOKEN_BITWISE_AND:
-            return "&";
         case TOKEN_TEXT:
             return "TEXT";
         case TOKEN_INT:
@@ -98,7 +110,7 @@ Token* tokenizer(FILE* file) {
     int tokens_capacity = 16;
     int tokens_count = 0;
     Token* tokens = malloc(sizeof(Token) * tokens_capacity);
-    if(tokens == NULL){
+    if (tokens == NULL) {
         fprintf(stderr, "[-] Can't allocate memory for token");
         exit(1);
     }
@@ -107,7 +119,6 @@ Token* tokenizer(FILE* file) {
     int count = 0;
     buffer[0] = '\0';
 
-    int last;
     int current;
     while ((current = fgetc(file)) != EOF) {
         // -- TEXT  --
@@ -125,7 +136,6 @@ Token* tokenizer(FILE* file) {
             temp.value[i] = '\0';
 
             tokenPush(&tokens, &temp, &tokens_capacity, &tokens_count);
-            last = current;
             continue;
         }
 
@@ -138,7 +148,6 @@ Token* tokenizer(FILE* file) {
                 count = 0;
                 buffer[0] = '\0';
             }
-            last = current;
             continue;
         }
 
@@ -147,7 +156,6 @@ Token* tokenizer(FILE* file) {
             if (count < sizeof(buffer) - 1) {
                 buffer[count++] = (char)current;
             }
-            last = current;
             continue;
         }
 
@@ -156,12 +164,11 @@ Token* tokenizer(FILE* file) {
             if (count < sizeof(buffer) - 1) {
                 buffer[count++] = (char)current;
             }
-            last = current;
             continue;
         }
 
         // -- Symbols --
-        if (strchr("=,;{}()>&<", current)) {
+        if (strchr("|=,;{}()>&<!*", current)) {
             if (count > 0) {
                 buffer[count] = '\0';
                 Token temp = firstToken(buffer, current);
@@ -169,66 +176,128 @@ Token* tokenizer(FILE* file) {
                 count = 0;
                 buffer[0] = '\0';
             }
-
+            int next;
             Token temp = {0};
             switch (current) {
+                case '|':
+                    next = fgetc(file);
+                    if (next == '|') {
+                        temp.type = TOKEN_OR;
+                        strcpy(temp.value, "||");
+                    } else {
+                        temp.type = TOKEN_BITWISE_OR;
+                        temp.value[0] = '|';
+                        temp.value[1] = '\0';
+                        ungetc(next, file);
+                    }
+                    break;
                 case '>':
-                    temp.type = TOKEN_MAJOR;
+                    next = fgetc(file);
+                    if (next == '=') {
+                        temp.type = TOKEN_EMAJOR;
+                        strcpy(temp.value, ">=");
+                    } else {
+                        temp.type = TOKEN_MAJOR;
+                        temp.value[0] = '>';
+                        temp.value[1] = '\0';
+                        ungetc(next, file);
+                    }
                     break;
                 case '<':
-                    temp.type = TOKEN_MINOR;
+                    next = fgetc(file);
+                    if (next == '=') {
+                        temp.type = TOKEN_EMINOR;
+                        strcpy(temp.value, "<=");
+                    } else {
+                        temp.type = TOKEN_MINOR;
+                        temp.value[0] = '<';
+                        temp.value[1] = '\0';
+                        ungetc(next, file);
+                    }
                     break;
                 case '=':
-                    temp.type = TOKEN_ASSIGN;
+                    next = fgetc(file);
+                    if (next == '=') {
+                        temp.type = TOKEN_EQUAL;
+                        strcpy(temp.value, "==");
+                    } else {
+                        temp.type = TOKEN_ASSIGN;
+                        temp.value[0] = '=';
+                        temp.value[1] = '\0';
+                        ungetc(next, file);
+                    }
                     break;
                 case ';':
                     temp.type = TOKEN_END;
+                    temp.value[0] = ';';
+                    temp.value[1] = '\0';
                     break;
                 case ',':
                     temp.type = TOKEN_COMMA;
+                    temp.value[0] = ',';
+                    temp.value[1] = '\0';
                     break;
                 case '(':
                     temp.type = TOKEN_LPAREN;
+                    temp.value[0] = '(';
+                    temp.value[1] = '\0';
                     break;
                 case ')':
                     temp.type = TOKEN_RPAREN;
+                    temp.value[0] = ')';
+                    temp.value[1] = '\0';
                     break;
                 case '{':
                     temp.type = TOKEN_LBRACE;
+                    temp.value[0] = '{';
+                    temp.value[1] = '\0';
                     break;
                 case '}':
                     temp.type = TOKEN_RBRACE;
+                    temp.value[0] = '}';
+                    temp.value[1] = '\0';
                     break;
-                case '&': {
-                    int next = fgetc(file);
+                case '*':
+                    temp.type = TOKEN_POINTER;
+                    temp.value[0] = '*';
+                    temp.value[1] = '\0';
+                    break;
+                case '!':
+                    next = fgetc(file);
+                    if (next == '=') {
+                        temp.type = TOKEN_NEQUAL;
+                        strcpy(temp.value, "!=");
+                    } else {
+                        temp.type = TOKEN_NOT;
+                        temp.value[0] = '!';
+                        temp.value[1] = '\0';
+                        ungetc(next, file);
+                    }
+                    break;
+                case '&':
+                    next = fgetc(file);
                     if (next == '&') {
                         temp.type = TOKEN_AND;
-                        temp.value[0] = '&';
-                        temp.value[1] = '&';
-                        temp.value[2] = '\0';
+                        strcpy(temp.value, "&&");
                     } else {
                         temp.type = TOKEN_BITWISE_AND;
                         temp.value[0] = '&';
                         temp.value[1] = '\0';
                         ungetc(next, file);
                     }
-                } break;
+                    break;
                 default:
                     temp.type = TOKEN_IDENTIFIER;
+                    temp.value[0] = (char)current;
+                    temp.value[1] = '\0';
                     break;
             }
 
-            if (current != '&') {
-                temp.value[0] = (char)current;
-                temp.value[1] = '\0';
-            }
-
             tokenPush(&tokens, &temp, &tokens_capacity, &tokens_count);
-            last = current;
             continue;
         }
 
-        fprintf(stderr, "[-] Invalid syntaxt %c \n", current);
+        fprintf(stderr, "[-] Invalid syntax %c \n", current);
         exit(1);
     }
 

@@ -8,18 +8,27 @@
 #include <stdbool.h>
 
 typedef enum {
-    TOKEN_TEXT,         // "
+    TOKEN_IDENTIFIER,   // identifier
     TOKEN_VOID,         // void
     TOKEN_INT,          // 0
     TOKEN_FLOAT,        // 0.0
     TOKEN_CHAR,         // char
-    TOKEN_IDENTIFIER,   // identifier
+    TOKEN_TEXT,         // "
+
+    TOKEN_NOT,          // !
     TOKEN_EQUAL,        // ==
+    TOKEN_NEQUAL,       // !=
+    TOKEN_EMAJOR,       // >=
+    TOKEN_EMINOR,       // <=
     TOKEN_MAJOR,        // >
     TOKEN_MINOR,        // <
+    TOKEN_OR,           // ||
     TOKEN_AND,          // &&
+
+    TOKEN_BITWISE_OR,   // |
     TOKEN_BITWISE_AND,  // &
     TOKEN_POINTER,      // *
+
     TOKEN_ASSIGN,       // =
     TOKEN_LPAREN,       // (
     TOKEN_RPAREN,       // )
@@ -27,6 +36,7 @@ typedef enum {
     TOKEN_LBRACE,       // {
     TOKEN_COMMA,        // ,
     TOKEN_END,          // ;
+
     TOKEN_OEF,
 } TokenType;
 
