@@ -61,9 +61,11 @@ struct Node {
     Node* next;  // Point to the next node
 
     char name[256];  // Name of var or Name of text
-    char letter;     // Just for chars
-    int  number;     // only for NO_NUM or NO_RETURN
-    char str;        // only for NO_CHAR
+    union{
+        char letter;     // Just for chars
+        int  number;     // only for NO_NUM or NO_RETURN
+        float floatVar; // only for NO_NUM or NO_RETURN
+    };
 };
 
 typedef enum { RET_INT, RET_CHAR, RET_FLOAT, RET_VOID } FunReturnType;
