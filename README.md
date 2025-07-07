@@ -46,11 +46,11 @@ int getTwo() {
     return (*ptr, true);
 }
 
-void main() {
+int main() {
     // Tuple unpacking with type inference
     let (a, b) = getTuple();
     if (!b) {
-        exit(-1);
+        return -1;
     }
     print("A: {}, B: {}\n", a, b);
 
@@ -60,7 +60,7 @@ void main() {
 
     "Hello, how are you\n"; // Implicitly prints the string
 
-    return;
+    return 0;
 }
 
 ```
