@@ -1,5 +1,12 @@
 #include "../include/tokenizer.h"
 
+// -- Check the next char --
+static int fpeek(FILE* file) {
+    int c = fgetc(file);
+    if (c != EOF) ungetc(c, file);
+    return c;
+}
+
 // -- Assign the right token --
 static Token firstToken(const char buffer[256], char current) {
     Token temp;
@@ -12,19 +19,41 @@ static Token firstToken(const char buffer[256], char current) {
         temp.type = TOKEN_FLOAT;
     } else if (strcmp(buffer, "void") == 0) {
         temp.type = TOKEN_VOID;
-
     } else {
         bool isNumeric = true;
+        bool hasDecimalPoint = false;
+        bool hasDigitsBefore = false;
+        bool hasDigitsAfter = false;
+
         for (int i = 0; buffer[i] != '\0'; i++) {
-            if (!isdigit(buffer[i])) {
+            if (buffer[i] == '.') {
+                if (hasDecimalPoint) {
+                    isNumeric = false;
+                    break;
+                }
+                hasDecimalPoint = true;
+            } else if (!isdigit(buffer[i])) {
                 isNumeric = false;
                 break;
+            } else {
+                if (hasDecimalPoint) {
+                    hasDigitsAfter = true;
+                } else {
+                    hasDigitsBefore = true;
+                }
             }
         }
 
         if (isNumeric) {
-            temp.type = TOKEN_INT;
-        } else {
+            if (hasDecimalPoint && (hasDigitsBefore || hasDigitsAfter)) {
+                temp.type = TOKEN_FLOAT;
+            } else if (!hasDecimalPoint) {
+                temp.type = TOKEN_INT;
+            } else {
+                isNumeric = false;
+            }
+        }
+        if (!isNumeric) {
             temp.type = TOKEN_IDENTIFIER;
         }
     }
@@ -59,6 +88,8 @@ static const char* tokenTypeToString(const TokenType type) {
             return "AND";
         case TOKEN_BITWISE_OR:
             return "BITWISE OR";
+        case TOKEN_DOT:
+            return "DOT";
         case TOKEN_OR:
             return "OR";
         case TOKEN_EMINOR:
@@ -181,7 +212,7 @@ Token* tokenizer(FILE* file) {
         }
 
         // -- Digits --
-        if (isdigit(current)) {
+        if (isdigit(current) || (current == '.' && isdigit(fpeek(file)))) {
             if (count < sizeof(buffer) - 1) {
                 buffer[count++] = (char)current;
             }
@@ -189,7 +220,7 @@ Token* tokenizer(FILE* file) {
         }
 
         // -- Symbols --
-        if (strchr("|=,;{}()>&<!*", current)) {
+        if (strchr("|=,;{}()>&<!*.", current)) {
             if (count > 0) {
                 buffer[count] = '\0';
                 Token temp = firstToken(buffer, current);
@@ -211,6 +242,11 @@ Token* tokenizer(FILE* file) {
                         temp.value[1] = '\0';
                         ungetc(next, file);
                     }
+                    break;
+                case '.':
+                    temp.type = TOKEN_DOT;
+                    temp.value[0] = '.';
+                    temp.value[1] = '\0';
                     break;
                 case '>':
                     next = fgetc(file);

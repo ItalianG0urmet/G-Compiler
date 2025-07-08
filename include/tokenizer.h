@@ -15,6 +15,7 @@ typedef enum {
     TOKEN_CHAR,         // char
     TOKEN_TEXT,         // "
     TOKEN_LETTER,       // '
+    TOKEN_DOT,          // .
 
     TOKEN_NOT,          // !
     TOKEN_EQUAL,        // ==
