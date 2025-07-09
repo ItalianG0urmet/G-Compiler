@@ -57,8 +57,8 @@ static void generateFunctionIR(Function* fun, LLVMContextRef* context,
             case NO_ASSIGN_CHAR: {
                 LLVMValueRef var =
                     LLVMBuildAlloca(builder, charType, node->name);
-                LLVMBuildStore(builder,
-                               LLVMConstInt(charType, node->letter, 0), var);
+                LLVMBuildStore(builder, LLVMConstInt(charType, node->letter, 0),
+                               var);
                 break;
             }
             case NO_PRINT: {
