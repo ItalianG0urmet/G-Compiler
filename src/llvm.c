@@ -10,7 +10,7 @@
 
 static void generateFunctionIR(Function* fun, LLVMContextRef* context,
                                LLVMModuleRef* module) {
-    // Default var
+    // Default types
     const LLVMTypeRef voidType = LLVMVoidType();
     const LLVMTypeRef intType = LLVMInt32Type();
     const LLVMTypeRef charType = LLVMInt8Type();
@@ -32,11 +32,13 @@ static void generateFunctionIR(Function* fun, LLVMContextRef* context,
             returnType = floatType;
             break;
         default:
-            fprintf(stderr, "[-] Can't find return type in IR \n");
+            fprintf(stderr, "[-] Unknown return type for function %s\n",
+                    fun->name);
+            exit(1);
     }
 
-    LLVMTypeRef paramTypes[] = {};  // TODO: I should make this variable
-    LLVMTypeRef funcType = LLVMFunctionType(intType, paramTypes, 0, 0);
+    LLVMTypeRef funcType =
+        LLVMFunctionType(returnType, NULL, 0, 0);  // TODO: Add more args
     LLVMValueRef func = LLVMAddFunction(*module, fun->name, funcType);
     LLVMBasicBlockRef entry = LLVMAppendBasicBlock(func, "entry");
     LLVMBuilderRef builder = LLVMCreateBuilder();
@@ -86,11 +88,26 @@ static void generateFunctionIR(Function* fun, LLVMContextRef* context,
             }
 
             case NO_RETURN: {
-                if (fun->returnType == RET_VOID) {
-                    LLVMBuildRetVoid(builder);
-                } else {
-                    LLVMBuildRet(builder,
-                                 LLVMConstInt(intType, node->number, 0));
+                switch (fun->returnType) {
+                    case RET_VOID:
+                        LLVMBuildRetVoid(builder);
+                        break;
+                    case RET_INT:
+                        LLVMBuildRet(builder,
+                                     LLVMConstInt(intType, node->number, 0));
+                        break;
+                    case RET_FLOAT:
+                        LLVMBuildRet(builder,
+                                     LLVMConstReal(floatType, node->floating));
+                        break;
+                    case RET_CHAR:
+                        LLVMBuildRet(builder,
+                                     LLVMConstInt(charType, node->letter, 0));
+                        break;
+                    default:
+                        fprintf(stderr, "[-] Invalid return in %s\n",
+                                fun->name);
+                        exit(1);
                 }
                 break;
             }
