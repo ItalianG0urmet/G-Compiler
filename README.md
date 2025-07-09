@@ -71,4 +71,7 @@ int main() {
 - [x] AST for variables/functions
 - [ ] Control flow (if/while)
 - [ ] Complex types (structs)
+- [ ] Optimization manager
 - [ ] Memory management
+- [ ] Annotation
+- [ ] Memory safety
