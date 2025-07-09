@@ -54,6 +54,15 @@ static void generateFunctionIR(Function* fun, LLVMContextRef* context,
                 break;
             }
 
+            case NO_ASSIGN_FLOAT: {
+                LLVMValueRef var =
+                    LLVMBuildAlloca(builder, floatType, node->name);
+                LLVMBuildStore(builder,
+                               LLVMConstReal(floatType, node->floating), var);
+
+                break;
+            }
+
             case NO_ASSIGN_CHAR: {
                 LLVMValueRef var =
                     LLVMBuildAlloca(builder, charType, node->name);

@@ -1,6 +1,7 @@
 int main(){
-    int x = 10;
-    char letter = 'a';
-    "Hello, world \n";
+
+    float x = 10.4;
+    "Hello, world";
+
     return 0;
 }
