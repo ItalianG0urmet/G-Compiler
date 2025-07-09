@@ -64,7 +64,7 @@ struct Node {
     union{
         char letter;     // Just for chars
         int  number;     // only for NO_NUM or NO_RETURN
-        float floatVar; // only for NO_NUM or NO_RETURN
+        float floating; // only for NO_NUM or NO_RETURN
     };
 };
 

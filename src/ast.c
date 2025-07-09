@@ -39,9 +39,37 @@ static Node* transformIntoNode(const Token* tokens, int* currentIndex) {
         return node;
     }
 
+    // Float & not init
+    if (tokens[*currentIndex].type == TOKEN_FLOAT) {
+        if (tokens[(*currentIndex) + 1].type == TOKEN_IDENTIFIER) {
+            if (tokens[(*currentIndex) + 2].type == TOKEN_END) {
+                strncpy(node->name, tokens[(*currentIndex) + 1].value,
+                        sizeof(node->name));
+                node->type = NO_ASSIGN_FLOAT;
+                printf("[+] Added not defined float named %s \n", node->name);
+                (*currentIndex) += 3;
+                return node;
+            } else if (tokens[(*currentIndex) + 2].type == TOKEN_ASSIGN &&
+                       tokens[(*currentIndex) + 3].type == TOKEN_FLOAT &&
+                       strcmp(tokens[(*currentIndex) + 3].value, "float") !=
+                           0) {
+                strncpy(node->name, tokens[(*currentIndex) + 1].value,
+                        sizeof(node->name));
+                node->type = NO_ASSIGN_FLOAT;
+                node->floating = atof(tokens[(*currentIndex) + 3].value);
+                printf("[+] Added defined float named %s with value %f\n",
+                       node->name, node->floating);
+                (*currentIndex) += 5;
+                return node;
+            } else {
+                fprintf(stderr, "[-] Syntax error in float definition\n");
+                exit(1);
+            }
+        }
+    }
+
     // Int & not init
-    if (tokens[*currentIndex].type == TOKEN_INT &&
-        strcmp(tokens[*currentIndex].value, "int") == 0) {
+    if (tokens[*currentIndex].type == TOKEN_INT) {
         if (tokens[(*currentIndex) + 1].type == TOKEN_IDENTIFIER) {
             if (tokens[(*currentIndex) + 2].type == TOKEN_END) {
                 strncpy(node->name, tokens[(*currentIndex) + 1].value,
@@ -56,6 +84,7 @@ static Node* transformIntoNode(const Token* tokens, int* currentIndex) {
                     strncpy(node->name, tokens[(*currentIndex) + 1].value,
                             sizeof(node->name));
                     node->type = NO_ASSIGN_INT;
+                    node->number = atoi(tokens[(*currentIndex) + 3].value);
                     printf("[+] Added defined int named %s \n", node->name);
                     (*currentIndex) += 5;
                     return node;
@@ -64,7 +93,7 @@ static Node* transformIntoNode(const Token* tokens, int* currentIndex) {
                     exit(1);
                 }
             } else {
-                fprintf(stderr, "[-] Invalid var \n");
+                fprintf(stderr, "[-] Invalid int \n");
                 exit(1);
             }
         }
@@ -127,10 +156,11 @@ static Node* transformIntoNode(const Token* tokens, int* currentIndex) {
         }
     }
 
-    fprintf(
-        stderr,
-        "[-] Unknown or unsupported token at index %d (type=%d, value='%s')\n",
-        *currentIndex, tokens[*currentIndex].type, tokens[*currentIndex].value);
+    fprintf(stderr,
+            "[-] Unknown or unsupported token at index %d (type=%d, "
+            "value='%s')\n",
+            *currentIndex, tokens[*currentIndex].type,
+            tokens[*currentIndex].value);
     exit(1);
 }
 
