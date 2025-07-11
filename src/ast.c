@@ -169,7 +169,7 @@ static Node* parseIf(const Token* tokens, int* currentIndex) {
     Node* node = calloc(1, sizeof(Node));
     checkIfAllocated(node, __LINE__);
 
-    node->type = TOKEN_IDENTIFIER;
+    node->type = NO_IF;
 
     // Syntax check
     EXPECT(tokens, *currentIndex + 1, TOKEN_LPAREN, "expected '(' after 'if'")
