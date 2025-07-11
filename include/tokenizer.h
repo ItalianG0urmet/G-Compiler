@@ -31,6 +31,9 @@ typedef enum {
     TOKEN_BITWISE_AND,  // &
     TOKEN_POINTER,      // *
 
+    TOKEN_PLUS,         // +
+    TOKEN_MINUS,        // -
+
     TOKEN_ASSIGN,       // =
     TOKEN_LPAREN,       // (
     TOKEN_RPAREN,       // )

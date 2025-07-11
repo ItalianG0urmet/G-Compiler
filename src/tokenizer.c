@@ -82,6 +82,10 @@ static void tokenPush(Token** tokens, const Token* token, int* tokens_capacity,
 // -- Translate the toke type to a string --
 static const char* tokenTypeToString(const TokenType type) {
     switch (type) {
+        case TOKEN_PLUS:
+            return "PLUS";
+        case TOKEN_MINUS:
+            return "MINUS";
         case TOKEN_BITWISE_AND:
             return "BITWISE AND";
         case TOKEN_AND:
@@ -220,7 +224,7 @@ Token* tokenizer(FILE* file) {
         }
 
         // -- Symbols --
-        if (strchr("|=,;{}()>&<!*.", current)) {
+        if (strchr("|=,;{}()>&<!*.+-", current)) {
             if (count > 0) {
                 buffer[count] = '\0';
                 Token temp = firstToken(buffer, current);
@@ -242,6 +246,16 @@ Token* tokenizer(FILE* file) {
                         temp.value[1] = '\0';
                         ungetc(next, file);
                     }
+                    break;
+                case '+':
+                    temp.type = TOKEN_PLUS;
+                    temp.value[0] = '+';
+                    temp.value[1] = '\0';
+                    break;
+                case '-':
+                    temp.type = TOKEN_MINUS;
+                    temp.value[0] = '.';
+                    temp.value[1] = '\0';
                     break;
                 case '.':
                     temp.type = TOKEN_DOT;
