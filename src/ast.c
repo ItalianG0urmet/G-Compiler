@@ -1,15 +1,18 @@
 #include "../include/ast.h"
 
+#include <stdlib.h>
+#include <string.h>
+
 // -- Syntax checking macro --
-#define EXPECT(tokenArr, index, expectedType, msg)                 \
-    if ((tokenArr)[index].type != expectedType) {                  \
+#define EXPECT(token_arr, index, expectedType, msg)                \
+    if ((token_arr)[index].type != expectedType) {                 \
         fprintf(stderr, "[-] Syntax Error: %s. Found '%s'\n", msg, \
-                (tokenArr)[index].value);                          \
+                (token_arr)[index].value);                         \
         exit(1);                                                   \
     }
 
 // -- Check if a ptr in allocated --
-static inline void checkIfAllocated(const void* ptr, int line) {
+static void check_if_allocated(const void* ptr, const int line) {
     if (ptr == NULL) {
         fprintf(stderr, "[-] Failed to allocate memory, at line %d of %s\n",
                 line, __FILE__);
@@ -18,139 +21,149 @@ static inline void checkIfAllocated(const void* ptr, int line) {
 }
 
 // -- Parse the symbols and expression --
-static Node* parseExpression(const Token* tokens, int* currentIndex) {
+static node_t* parse_expression(const token_t* tokens,
+                                const int* current_index) {
     // TODO: Create expression parser
-    if (tokens[(*currentIndex + 1)].type != TOKEN_LPAREN) {
+    if (tokens[(*current_index + 1)].type != TOKEN_LPAREN) {
     }
+    return NULL;  // TODO
 }
 
-static Node* parseIf(const Token* tokens, int* currentIndex);
+static node_t* parse_if(const token_t* tokens, int* current_index);
 
-// -- Transfrom some tokens into node --
-static Node* transformIntoNode(const Token* tokens, int* currentIndex) {
-    Node* node = calloc(1, sizeof(Node));
-    checkIfAllocated(node, __LINE__);
+// -- Transform some tokens into node --
+static node_t* transform_into_node(const token_t* tokens, int* current_index) {
+    node_t* node = calloc(1, sizeof(node_t));
+    check_if_allocated(node, __LINE__);
 
     // If
-    if (tokens[*currentIndex].type == TOKEN_IDENTIFIER &&
-        strcmp(tokens[*currentIndex].value, "if") == 0) {
+    if (tokens[*current_index].type == TOKEN_IDENTIFIER &&
+        strcmp(tokens[*current_index].value, "if") == 0) {
         printf("[+] Found if \n");
-        node = parseIf(tokens, currentIndex);
+        node = parse_if(tokens, current_index);
         return node;
     }
 
     // Float & not init
-    if (tokens[*currentIndex].type == TOKEN_FLOAT) {
-        if (tokens[(*currentIndex) + 1].type == TOKEN_IDENTIFIER) {
-            if (tokens[(*currentIndex) + 2].type == TOKEN_END) {
-                strncpy(node->name, tokens[(*currentIndex) + 1].value,
+    if (tokens[*current_index].type == TOKEN_FLOAT) {
+        if (tokens[*current_index + 1].type == TOKEN_IDENTIFIER) {
+            if (tokens[*current_index + 2].type == TOKEN_END) {
+                strncpy(node->name, tokens[*current_index + 1].value,
                         sizeof(node->name));
                 node->type = NO_ASSIGN_FLOAT;
                 printf("[+] Added not defined float named %s \n", node->name);
-                (*currentIndex) += 3;
+                *current_index += 3;
                 return node;
-            } else if (tokens[(*currentIndex) + 2].type == TOKEN_ASSIGN &&
-                       tokens[(*currentIndex) + 3].type == TOKEN_FLOAT &&
-                       strcmp(tokens[(*currentIndex) + 3].value, "float") !=
-                           0) {
-                strncpy(node->name, tokens[(*currentIndex) + 1].value,
+            }
+
+            if (tokens[*current_index + 2].type == TOKEN_ASSIGN &&
+                tokens[*current_index + 3].type == TOKEN_FLOAT &&
+                strcmp(tokens[*current_index + 3].value, "float") != 0) {
+                strncpy(node->name, tokens[*current_index + 1].value,
                         sizeof(node->name));
                 node->type = NO_ASSIGN_FLOAT;
-                node->floating = atof(tokens[(*currentIndex) + 3].value);
+                node->floating = atof(tokens[*current_index + 3].value);
                 printf("[+] Added defined float named %s with value %f\n",
                        node->name, node->floating);
-                (*currentIndex) += 5;
+                *current_index += 5;
                 return node;
-            } else {
-                fprintf(stderr, "[-] Syntax error in float definition\n");
-                exit(1);
             }
+
+            fprintf(stderr, "[-] Syntax error in float definition\n");
+            exit(1);
         }
     }
 
     // Int & not init
-    if (tokens[*currentIndex].type == TOKEN_INT) {
-        if (tokens[(*currentIndex) + 1].type == TOKEN_IDENTIFIER) {
-            if (tokens[(*currentIndex) + 2].type == TOKEN_END) {
-                strncpy(node->name, tokens[(*currentIndex) + 1].value,
+    if (tokens[*current_index].type == TOKEN_INT) {
+        if (tokens[*current_index + 1].type == TOKEN_IDENTIFIER) {
+            if (tokens[*current_index + 2].type == TOKEN_END) {
+                strncpy(node->name, tokens[*current_index + 1].value,
                         sizeof(node->name));
                 node->type = NO_ASSIGN_INT;
                 printf("[+] Added not defined int named %s \n", node->name);
-                (*currentIndex) += 3;
+                *current_index += 3;
                 return node;
-            } else if (tokens[(*currentIndex) + 2].type == TOKEN_ASSIGN) {
-                if (tokens[(*currentIndex) + 3].type == TOKEN_INT &&
-                    strcmp(tokens[(*currentIndex) + 3].value, "int") != 0) {
-                    strncpy(node->name, tokens[(*currentIndex) + 1].value,
+            }
+            if (tokens[*current_index + 2].type == TOKEN_ASSIGN) {
+                if (tokens[*current_index + 3].type == TOKEN_INT &&
+                    strcmp(tokens[*current_index + 3].value, "int") != 0) {
+                    strncpy(node->name, tokens[*current_index + 1].value,
                             sizeof(node->name));
                     node->type = NO_ASSIGN_INT;
-                    node->number = atoi(tokens[(*currentIndex) + 3].value);
+                    node->number = atoi(tokens[*current_index + 3].value);
                     printf("[+] Added defined int named %s \n", node->name);
-                    (*currentIndex) += 5;
+                    *current_index += 5;
                     return node;
-                } else {
-                    fprintf(stderr, "[-] Syntax error \n");
-                    exit(1);
                 }
-            } else {
-                fprintf(stderr, "[-] Invalid int \n");
+                fprintf(stderr, "[-] Syntax error \n");
                 exit(1);
             }
+            fprintf(stderr, "[-] Invalid int \n");
+            exit(1);
         }
+    }
+
+    // Increment
+    if (tokens[*current_index].type == TOKEN_IDENTIFIER &&
+        tokens[*current_index + 1].type == TOKEN_INCREMENT &&
+        tokens[*current_index + 2].type == TOKEN_END) {
+        node->type = NO_INCREMENT;
+        printf("[+] Added increment for %s \n", tokens[*current_index].value);
+        *current_index += 3;
+        return node;
     }
 
     // Char
-    if (tokens[*currentIndex].type == TOKEN_CHAR &&
-        tokens[(*currentIndex) + 1].type == TOKEN_IDENTIFIER) {
-        if (tokens[(*currentIndex) + 2].type == TOKEN_END) {
-            strncpy(node->name, tokens[(*currentIndex) + 1].value,
+    if (tokens[*current_index].type == TOKEN_CHAR &&
+        tokens[*current_index + 1].type == TOKEN_IDENTIFIER) {
+        if (tokens[*current_index + 2].type == TOKEN_END) {
+            strncpy(node->name, tokens[*current_index + 1].value,
                     sizeof(node->name));
             node->type = NO_ASSIGN_CHAR;
             printf("[+] Added not defined char named %s \n", node->name);
-            (*currentIndex) += 3;
+            *current_index += 3;
             return node;
-
-        } else if (tokens[(*currentIndex) + 2].type == TOKEN_ASSIGN &&
-                   tokens[(*currentIndex) + 3].type == TOKEN_LETTER) {
-            strncpy(node->name, tokens[(*currentIndex) + 1].value,
+        }
+        if (tokens[*current_index + 2].type == TOKEN_ASSIGN &&
+            tokens[*current_index + 3].type == TOKEN_LETTER) {
+            strncpy(node->name, tokens[*current_index + 1].value,
                     sizeof(node->name));
             node->type = NO_ASSIGN_CHAR;
-            node->letter = tokens[(*currentIndex) + 3].value[0];
+            node->letter = tokens[*current_index + 3].value[0];
             printf("[+] Added defined char named %s with value '%c'\n",
                    node->name, node->letter);
-            (*currentIndex) += 5;
+            *current_index += 5;
             return node;
-        } else {
-            fprintf(stderr, "[-] Syntax error in char definition\n");
-            exit(1);
         }
+        fprintf(stderr, "[-] Syntax error in char definition\n");
+        exit(1);
     }
 
     // Return
-    if (tokens[*currentIndex].type == TOKEN_IDENTIFIER &&
-        strcmp(tokens[*currentIndex].value, "return") == 0) {
-        if (tokens[(*currentIndex) + 1].type == TOKEN_INT &&
-            strcmp(tokens[(*currentIndex) + 1].value, "int") != 0) {
-            int returnCode = atoi(tokens[(*currentIndex) + 1].value);
+    if (tokens[*current_index].type == TOKEN_IDENTIFIER &&
+        strcmp(tokens[*current_index].value, "return") == 0) {
+        if (tokens[*current_index + 1].type == TOKEN_INT &&
+            strcmp(tokens[*current_index + 1].value, "int") != 0) {
+            const int return_code = atoi(tokens[*current_index + 1].value);
             node->type = NO_RETURN;
-            node->number = returnCode;
-            printf("[+] Added return type, that return %d \n", returnCode);
-            (*currentIndex) += 3;
+            node->number = return_code;
+            printf("[+] Added return type, that return %d \n", return_code);
+            *current_index += 3;
             return node;
-        } else {
-            fprintf(stderr, "[-] Invalid syntax on return function \n");
-            exit(1);
         }
+        fprintf(stderr, "[-] Invalid syntax on return function \n");
+        exit(1);
     }
 
     // Text
-    if (tokens[*currentIndex].type == TOKEN_TEXT &&
-        tokens[(*currentIndex) - 1].type != TOKEN_ASSIGN) {
-        if (tokens[(*currentIndex) + 1].type == TOKEN_END) {
+    if (tokens[*current_index].type == TOKEN_TEXT &&
+        tokens[*current_index - 1].type != TOKEN_ASSIGN) {
+        if (tokens[*current_index + 1].type == TOKEN_END) {
             node->type = NO_PRINT;
-            strncpy(node->name, tokens[*currentIndex].value,
+            strncpy(node->name, tokens[*current_index].value,
                     sizeof(node->name));
-            (*currentIndex) += 2;
+            *current_index += 2;
             printf("[+] Added text type, that contains \"%s\" \n", node->name);
             return node;
         }
@@ -159,83 +172,89 @@ static Node* transformIntoNode(const Token* tokens, int* currentIndex) {
     fprintf(stderr,
             "[-] Unknown or unsupported token at index %d (type=%d, "
             "value='%s')\n",
-            *currentIndex, tokens[*currentIndex].type,
-            tokens[*currentIndex].value);
+            *current_index, tokens[*current_index].type,
+            tokens[*current_index].value);
     exit(1);
 }
 
-// -- Parse the if statment
-static Node* parseIf(const Token* tokens, int* currentIndex) {
-    Node* node = calloc(1, sizeof(Node));
-    checkIfAllocated(node, __LINE__);
+// -- Parse the if statement
+static node_t* parse_if(const token_t* tokens, int* current_index) {
+    node_t* node = calloc(1, sizeof(node_t));
+    check_if_allocated(node, __LINE__);
 
-    node->type = TOKEN_IDENTIFIER;
+    node->type = NO_IF;
 
     // Syntax check
-    EXPECT(tokens, *currentIndex + 1, TOKEN_LPAREN, "expected '(' after 'if'")
+    EXPECT(tokens, *current_index + 1, TOKEN_LPAREN, "expected '(' after 'if'")
 
-    *currentIndex += 2;
-    node->lnode = parseExpression(tokens, currentIndex);
+    *current_index += 2;
+    node->lnode = parse_expression(tokens, current_index);
 
-    EXPECT(tokens, *currentIndex, TOKEN_RPAREN, "expected ')' after condition")
-    (*currentIndex)++;
+    EXPECT(tokens, *current_index, TOKEN_RPAREN, "expected ')' after condition")
+    (*current_index)++;
 
-    EXPECT(tokens, *currentIndex, TOKEN_LBRACE, "expected '{' after if()")
-    (*currentIndex)++;
+    EXPECT(tokens, *current_index, TOKEN_LBRACE, "expected '{' after if()")
+    (*current_index)++;
 
     // Generate all the nodes
-    Node* thenBody = calloc(1, sizeof(Node));
-    checkIfAllocated(thenBody, __LINE__);
-    thenBody->type = NO_BODY;
-    Node* thenLast = NULL;
-    while (tokens[*currentIndex].type != TOKEN_RBRACE &&
-           tokens[*currentIndex].type != TOKEN_OEF) {
-        Node* stmt = transformIntoNode(tokens, currentIndex);
-        if (!thenBody->body) {
-            thenBody->body = stmt;
+    node_t* then_body = calloc(1, sizeof(node_t));
+    check_if_allocated(then_body, __LINE__);
+    then_body->type = NO_BODY;
+    node_t* then_last = NULL;
+    while (tokens[*current_index].type != TOKEN_RBRACE &&
+           tokens[*current_index].type != TOKEN_OEF) {
+        node_t* stmt = transform_into_node(tokens, current_index);
+        if (!then_body->body) {
+            then_body->body = stmt;
         } else {
-            thenLast->next = stmt;
+            if (then_last == NULL) {
+                fprintf(stderr, "[-] then_last is null\n");
+                exit(1);
+            }
+            then_last->next = stmt;
         }
-        thenLast = stmt;
+        then_last = stmt;
     }
 
     // Syntax check
-    EXPECT(tokens, *currentIndex, TOKEN_RBRACE, "expected '}' to close if body")
-    (*currentIndex)++;
+    EXPECT(tokens, *current_index, TOKEN_RBRACE,
+           "expected '}' to close if body")
+    (*current_index)++;
 
     // Attach
-    node->then = thenBody;
+    node->then = then_body;
     return node;
 }
 
 // -- Get a function by name --
-Function* getFunctionByName(const char* name, const FunctionList funList) {
-    for (int i = 0; i < funList.count; i++) {
-        if (strcmp(funList.functions[i]->name, name) == 0) {
-            return funList.functions[i];
+function_t* get_function_by_name(const char* name,
+                                 const function_list_t function_list) {
+    for (int i = 0; i < function_list.count; i++) {
+        if (strcmp(function_list.functions[i]->name, name) == 0) {
+            return function_list.functions[i];
         }
     }
     return NULL;
 }
 
 // -- Create a function --
-Function parseFunction(const Token* tokens, int* currentIndex) {
-    Token identifier = tokens[*currentIndex + 1];
+function_t parse_function(const token_t* tokens, int* current_index) {
+    token_t identifier = tokens[*current_index + 1];
 
     // Find return type
-    FunReturnType returnType;
-    switch (tokens[*currentIndex].type) {
+    fun_return_type_t return_type;
+    switch (tokens[*current_index].type) {
         case TOKEN_VOID:
-            returnType = RET_VOID;
+            return_type = RET_VOID;
             break;
         case TOKEN_INT:
-            returnType = RET_INT;
+            return_type = RET_INT;
             break;
         case TOKEN_CHAR:
-            returnType = RET_CHAR;
+            return_type = RET_CHAR;
             break;
         case TOKEN_FLOAT:
-            returnType = RET_FLOAT;
+            return_type = RET_FLOAT;
             break;
         default:
             fprintf(stderr, "[-] Can't find return type of %s\n",
@@ -244,51 +263,49 @@ Function parseFunction(const Token* tokens, int* currentIndex) {
     }
 
     // Parse the args and define
-    Argument* args = parseParam(tokens, *currentIndex, *currentIndex + 3);
-    while (tokens[*currentIndex].type == TOKEN_LBRACE) {
-        (*currentIndex)++;
+    argument_t* args = parse_param(tokens, *current_index + 3);
+    while (tokens[*current_index].type == TOKEN_LBRACE) {
+        (*current_index)++;
     }
 
-    Function fun;
+    function_t fun;
     fun.arguments = args;
-    fun.returnType = returnType;
+    fun.return_type = return_type;
 
-    EXPECT(tokens, *currentIndex + 1, TOKEN_IDENTIFIER,
+    EXPECT(tokens, *current_index + 1, TOKEN_IDENTIFIER,
            "invalid function identifier")
 
     strncpy(fun.name, identifier.value, sizeof(fun.name));
 
     // Skip to {
-    while (tokens[*currentIndex].type != TOKEN_LBRACE) {
-        (*currentIndex)++;
+    while (tokens[*current_index].type != TOKEN_LBRACE) {
+        (*current_index)++;
     }
-    (*currentIndex)++;
+    (*current_index)++;
 
     // Start node transformation
-    Node* body = calloc(1, sizeof(Node));
-    checkIfAllocated(body, __LINE__);
+    node_t* body = calloc(1, sizeof(node_t));
+    check_if_allocated(body, __LINE__);
     body->type = NO_BODY;
-    Node* last = NULL;
-    int nodeCount = 0;
+    node_t* last = NULL;
+    int node_count = 0;
     printf("\n[+] Defining function %s [+]\n", fun.name);
-    while (tokens[*currentIndex].type != TOKEN_RBRACE &&
-           tokens[*currentIndex].type != TOKEN_OEF) {
-        Node* node = transformIntoNode(tokens, currentIndex);
-
-        if (node == NULL) {
-            fprintf(stderr, "[-] Failed to create AST node at token index %d\n",
-                    *currentIndex);
-            exit(1);
-        }
+    while (tokens[*current_index].type != TOKEN_RBRACE &&
+           tokens[*current_index].type != TOKEN_OEF) {
+        node_t* node = transform_into_node(tokens, current_index);
 
         if (body->body == NULL) {
             body->body = node;
         } else {
+            if (last == NULL) {
+                fprintf(stderr, "[-] Last is null \n");
+                exit(1);
+            }
             last->next = node;
         }
 
         last = node;
-        nodeCount++;
+        node_count++;
     }
 
     if (last) {
@@ -296,24 +313,23 @@ Function parseFunction(const Token* tokens, int* currentIndex) {
     }
 
     fun.body = body;
-    fun.nodeCount = nodeCount;
-    printf("[*] %s function have %d nodes \n", fun.name, fun.nodeCount);
-    (*currentIndex)++;
+    fun.node_count = node_count;
+    printf("[*] %s function have %d nodes \n", fun.name, fun.node_count);
+    (*current_index)++;
     return fun;
 }
 
 // Get args for function
-Argument* parseParam(const Token* tokens, int currentIndex,
-                     const int firstParamIndex) {
-    int index = firstParamIndex;
-    int argCount = 0;
+argument_t* parse_param(const token_t* tokens, const int first_param_index) {
+    int index = first_param_index;
+    int arg_count = 0;
 
     while (tokens[index].type != TOKEN_RPAREN &&
            tokens[index].type != TOKEN_OEF) {
         if (tokens[index].type == TOKEN_INT ||
             tokens[index].type == TOKEN_FLOAT ||
             tokens[index].type == TOKEN_CHAR) {
-            argCount++;
+            arg_count++;
         }
 
         index += 2;
@@ -322,14 +338,14 @@ Argument* parseParam(const Token* tokens, int currentIndex,
         }
     }
 
-    Argument* arguments = calloc(argCount, sizeof(Argument));
-    checkIfAllocated(arguments, __LINE__);
+    argument_t* arguments = calloc(arg_count, sizeof(argument_t));
+    check_if_allocated(arguments, __LINE__);
 
-    index = firstParamIndex;
-    int argIndex = 0;
+    index = first_param_index;
+    int arg_index = 0;
     while (tokens[index].type != TOKEN_RPAREN &&
            tokens[index].type != TOKEN_OEF) {
-        Argument arg;
+        argument_t arg;
 
         switch (tokens[index].type) {
             case TOKEN_INT:
@@ -347,7 +363,7 @@ Argument* parseParam(const Token* tokens, int currentIndex,
         }
 
         index += 2;
-        arguments[argIndex++] = arg;
+        arguments[arg_index++] = arg;
 
         if (tokens[index].type == TOKEN_COMMA) {
             index++;
@@ -357,15 +373,16 @@ Argument* parseParam(const Token* tokens, int currentIndex,
     return arguments;
 }
 
-void addFunctionToList(Function* fun, FunctionList* functionList) {
-    functionList->functions = realloc(
-        functionList->functions, sizeof(Function*) * (functionList->count + 1));
+void add_function_to_list(function_t* fun, function_list_t* function_list) {
+    function_list->functions =
+        realloc(function_list->functions,
+                sizeof(function_t*) * (function_list->count + 1));
 
-    if (!functionList->functions) {
+    if (!function_list->functions) {
         fprintf(stderr, "[-] Error reallocating memory for function list\n");
         exit(1);
     }
 
-    functionList->functions[functionList->count] = fun;
-    functionList->count++;
+    function_list->functions[function_list->count] = fun;
+    function_list->count++;
 }

@@ -1,15 +1,20 @@
 #include "../include/tokenizer.h"
 
+#include <ctype.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <string.h>
+
 // -- Check the next char --
 static int fpeek(FILE* file) {
-    int c = fgetc(file);
+    const int c = fgetc(file);
     if (c != EOF) ungetc(c, file);
     return c;
 }
 
 // -- Assign the right token --
-static Token firstToken(const char buffer[256], char current) {
-    Token temp;
+static token_t first_token(const char buffer[256], char current) {
+    token_t temp;
 
     if (strcmp(buffer, "int") == 0) {
         temp.type = TOKEN_INT;
@@ -20,40 +25,40 @@ static Token firstToken(const char buffer[256], char current) {
     } else if (strcmp(buffer, "void") == 0) {
         temp.type = TOKEN_VOID;
     } else {
-        bool isNumeric = true;
-        bool hasDecimalPoint = false;
-        bool hasDigitsBefore = false;
-        bool hasDigitsAfter = false;
+        bool is_numeric = true;
+        bool has_decimal_point = false;
+        bool has_digits_before = false;
+        bool has_digits_after = false;
 
         for (int i = 0; buffer[i] != '\0'; i++) {
             if (buffer[i] == '.') {
-                if (hasDecimalPoint) {
-                    isNumeric = false;
+                if (has_decimal_point) {
+                    is_numeric = false;
                     break;
                 }
-                hasDecimalPoint = true;
+                has_decimal_point = true;
             } else if (!isdigit(buffer[i])) {
-                isNumeric = false;
+                is_numeric = false;
                 break;
             } else {
-                if (hasDecimalPoint) {
-                    hasDigitsAfter = true;
+                if (has_decimal_point) {
+                    has_digits_after = true;
                 } else {
-                    hasDigitsBefore = true;
+                    has_digits_before = true;
                 }
             }
         }
 
-        if (isNumeric) {
-            if (hasDecimalPoint && (hasDigitsBefore || hasDigitsAfter)) {
+        if (is_numeric) {
+            if (has_decimal_point && (has_digits_before || has_digits_after)) {
                 temp.type = TOKEN_FLOAT;
-            } else if (!hasDecimalPoint) {
+            } else if (!has_decimal_point) {
                 temp.type = TOKEN_INT;
             } else {
-                isNumeric = false;
+                is_numeric = false;
             }
         }
-        if (!isNumeric) {
+        if (!is_numeric) {
             temp.type = TOKEN_IDENTIFIER;
         }
     }
@@ -63,12 +68,12 @@ static Token firstToken(const char buffer[256], char current) {
 }
 
 // -- Allocate the token in the list --
-static void tokenPush(Token** tokens, const Token* token, int* tokens_capacity,
-                      int* tokens_count) {
+static void push_token(token_t** tokens, const token_t* token,
+                       int* tokens_capacity, int* tokens_count) {
     if (*tokens_count >= *tokens_capacity) {
         *tokens_capacity *= 2;
-        Token* new_tokens =
-            realloc(*tokens, sizeof(Token) * (*tokens_capacity));
+        token_t* new_tokens =
+            realloc(*tokens, sizeof(token_t) * (*tokens_capacity));
         if (!new_tokens) {
             perror("[-] Can't allocate new space \n");
             exit(1);
@@ -80,8 +85,10 @@ static void tokenPush(Token** tokens, const Token* token, int* tokens_capacity,
 }
 
 // -- Translate the toke type to a string --
-static const char* tokenTypeToString(const TokenType type) {
+static const char* token_type_to_string(const token_type_t type) {
     switch (type) {
+        case TOKEN_EQUAL:
+            return "EQUAL";
         case TOKEN_PLUS:
             return "PLUS";
         case TOKEN_MINUS:
@@ -92,6 +99,8 @@ static const char* tokenTypeToString(const TokenType type) {
             return "AND";
         case TOKEN_BITWISE_OR:
             return "BITWISE OR";
+        case TOKEN_INCREMENT:
+            return "INCREMENT";
         case TOKEN_DOT:
             return "DOT";
         case TOKEN_OR:
@@ -148,10 +157,10 @@ static const char* tokenTypeToString(const TokenType type) {
 }
 
 // -- Main function of the token class --
-Token* tokenizer(FILE* file) {
+token_t* tokenizer(FILE* file) {
     int tokens_capacity = 16;
     int tokens_count = 0;
-    Token* tokens = malloc(sizeof(Token) * tokens_capacity);
+    token_t* tokens = malloc(sizeof(token_t) * tokens_capacity);
     if (tokens == NULL) {
         fprintf(stderr, "[-] Can't allocate memory for token");
         exit(1);
@@ -165,7 +174,7 @@ Token* tokenizer(FILE* file) {
     while ((current = fgetc(file)) != EOF) {
         // -- TEXT  --
         if (current == '"') {
-            Token temp = {0};
+            token_t temp = {0};
             temp.type = TOKEN_TEXT;
             int i = 0;
 
@@ -177,13 +186,13 @@ Token* tokenizer(FILE* file) {
             }
             temp.value[i] = '\0';
 
-            tokenPush(&tokens, &temp, &tokens_capacity, &tokens_count);
+            push_token(&tokens, &temp, &tokens_capacity, &tokens_count);
             continue;
         }
 
         // -- Letter --
         if (current == '\'') {
-            Token temp = {0};
+            token_t temp = {0};
             temp.type = TOKEN_LETTER;
             int i = 0;
 
@@ -195,7 +204,7 @@ Token* tokenizer(FILE* file) {
             }
             temp.value[i] = '\0';
 
-            tokenPush(&tokens, &temp, &tokens_capacity, &tokens_count);
+            push_token(&tokens, &temp, &tokens_capacity, &tokens_count);
             continue;
         }
 
@@ -203,8 +212,8 @@ Token* tokenizer(FILE* file) {
         if (isspace(current)) {
             if (count > 0) {
                 buffer[count] = '\0';
-                Token temp = firstToken(buffer, current);
-                tokenPush(&tokens, &temp, &tokens_capacity, &tokens_count);
+                token_t temp = first_token(buffer, current);
+                push_token(&tokens, &temp, &tokens_capacity, &tokens_count);
                 count = 0;
                 buffer[0] = '\0';
             }
@@ -231,13 +240,13 @@ Token* tokenizer(FILE* file) {
         if (strchr("|=,;{}()>&<!*.+-/", current)) {
             if (count > 0) {
                 buffer[count] = '\0';
-                Token temp = firstToken(buffer, current);
-                tokenPush(&tokens, &temp, &tokens_capacity, &tokens_count);
+                token_t temp = first_token(buffer, current);
+                push_token(&tokens, &temp, &tokens_capacity, &tokens_count);
                 count = 0;
                 buffer[0] = '\0';
             }
             int next;
-            Token temp = {0};
+            token_t temp = {0};
             switch (current) {
                 case '|':
                     next = fgetc(file);
@@ -257,9 +266,16 @@ Token* tokenizer(FILE* file) {
                     temp.value[1] = '\0';
                     break;
                 case '+':
-                    temp.type = TOKEN_PLUS;
-                    temp.value[0] = '+';
-                    temp.value[1] = '\0';
+                    next = fgetc(file);
+                    if (next == '+') {
+                        temp.type = TOKEN_INCREMENT;
+                        strcpy(temp.value, "++");
+                    } else {
+                        temp.type = TOKEN_PLUS;
+                        temp.value[0] = '+';
+                        temp.value[1] = '\0';
+                        ungetc(next, file);
+                    }
                     break;
                 case '-':
                     temp.type = TOKEN_MINUS;
@@ -373,7 +389,7 @@ Token* tokenizer(FILE* file) {
                     break;
             }
 
-            tokenPush(&tokens, &temp, &tokens_capacity, &tokens_count);
+            push_token(&tokens, &temp, &tokens_capacity, &tokens_count);
             continue;
         }
 
@@ -384,23 +400,23 @@ Token* tokenizer(FILE* file) {
     // If buffer has leftover data at EOF
     if (count > 0) {
         buffer[count] = '\0';
-        Token temp = firstToken(buffer, '\0');
-        tokenPush(&tokens, &temp, &tokens_capacity, &tokens_count);
+        token_t temp = first_token(buffer, '\0');
+        push_token(&tokens, &temp, &tokens_capacity, &tokens_count);
         printf("[EOF-TOKEN] %s [%s]\n", temp.value,
-               tokenTypeToString(temp.type));
+               token_type_to_string(temp.type));
     }
 
     // Add OEF token
-    Token finish = {0};
+    token_t finish = {0};
     finish.type = TOKEN_OEF;
     strcpy(finish.value, "404");
-    tokenPush(&tokens, &finish, &tokens_capacity, &tokens_count);
+    push_token(&tokens, &finish, &tokens_capacity, &tokens_count);
 
     // Print all tokens
     printf("------- FINAL TOKENS -------\n");
     for (int i = 0; i < tokens_count; i++) {
         printf("[%02d] %s, %s\n", i, tokens[i].value,
-               tokenTypeToString(tokens[i].type));
+               token_type_to_string(tokens[i].type));
     }
     return tokens;
 }

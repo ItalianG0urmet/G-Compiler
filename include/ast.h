@@ -7,16 +7,16 @@ typedef enum {
     ARG_INT,
     ARG_FLOAT,
     ARG_CHAR,
-} ArgumentType;
+} argument_type_t;
 
 typedef struct {
-    ArgumentType type;
+    argument_type_t type;
     union {
-        int   i;
+        int i;
         float f;
-        char  str;
+        char str;
     };
-} Argument;
+} argument_t;
 
 typedef enum {
     NO_BODY,
@@ -25,6 +25,7 @@ typedef enum {
     NO_SUB,
     NO_MUL,
     NO_DIV,
+    NO_INCREMENT,
 
     NO_ASSIGN_INT,
     NO_ASSIGN_FLOAT,
@@ -42,50 +43,51 @@ typedef enum {
     NO_WHILE,
     NO_FOR,
     NO_FUNCALL
-} NodeType;
+} node_type_t;
 
-typedef struct Node Node;
+typedef struct Node node_t;
 
 struct Node {
-    NodeType type;
-    Node* lnode;
-    Node* rnode;
+    node_type_t type;
+    node_t* lnode;
+    node_t* rnode;
 
-    Node* code;  // IF, FOR
-    Node* then;  // IF or FOR body
-    Node* els;   // ELSE
-    Node* init;  // INIT FOR
-    Node* inc;   // INCREMENT FOR
+    node_t* code;  // IF, FOR
+    node_t* then;  // IF or FOR body
+    node_t* els;   // ELSE
+    node_t* init;  // INIT FOR
+    node_t* inc;   // INCREMENT FOR
 
-    Node* body;  // Point to the first node
-    Node* next;  // Point to the next node
+    node_t* body;  // Point to the first node
+    node_t* next;  // Point to the next node
 
     char name[256];  // Name of var or Name of text
-    union{
+    union {
         char letter;     // Just for chars
-        int  number;     // only for NO_NUM or NO_RETURN
-        float floating; // only for NO_NUM or NO_RETURN
+        int number;      // only for NO_NUM or NO_RETURN
+        float floating;  // only for NO_NUM or NO_RETURN
     };
 };
 
-typedef enum { RET_INT, RET_CHAR, RET_FLOAT, RET_VOID } FunReturnType;
+typedef enum { RET_INT, RET_CHAR, RET_FLOAT, RET_VOID } fun_return_type_t;
 
 typedef struct {
-    FunReturnType returnType;
-    Node*         body;
-    int           nodeCount;
-    Argument*     arguments;
-    char          name[256];
-} Function;
+    fun_return_type_t return_type;
+    node_t* body;
+    int node_count;
+    argument_t* arguments;
+    char name[256];
+} function_t;
 
 typedef struct {
-    Function** functions;
-    int        count;
-} FunctionList;
+    function_t** functions;
+    int count;
+} function_list_t;
 
-Function* getFunctionByName(const char* name, const FunctionList funList);
-Argument* parseParam(const Token* tokens, int currentIndex, const int firstParamIndex);
-Function parseFunction(const Token* tokens, int* currentIndex);
-void addFunctionToList(Function* fun, FunctionList* functionList);
+function_t* get_function_by_name(const char* name,
+                                 function_list_t function_list);
+argument_t* parse_param(const token_t* tokens, int first_param_index);
+function_t parse_function(const token_t* tokens, int* current_index);
+void add_function_to_list(function_t* fun, function_list_t* function_list);
 
 #endif

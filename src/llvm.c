@@ -8,28 +8,28 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-static void generateFunctionIR(Function* fun, LLVMContextRef* context,
-                               LLVMModuleRef* module) {
+static void generate_function_ir(function_t* fun, LLVMContextRef* context,
+                                 const LLVMModuleRef* module) {
     // Default types
-    const LLVMTypeRef voidType = LLVMVoidType();
-    const LLVMTypeRef intType = LLVMInt32Type();
-    const LLVMTypeRef charType = LLVMInt8Type();
-    const LLVMTypeRef floatType = LLVMFloatType();
+    const LLVMTypeRef void_type = LLVMVoidType();
+    const LLVMTypeRef int_type = LLVMInt32Type();
+    const LLVMTypeRef char_type = LLVMInt8Type();
+    const LLVMTypeRef float_type = LLVMFloatType();
 
     // Find function return type
-    LLVMTypeRef returnType;
-    switch (fun->returnType) {
+    LLVMTypeRef return_type;
+    switch (fun->return_type) {
         case RET_VOID:
-            returnType = voidType;
+            return_type = void_type;
             break;
         case RET_INT:
-            returnType = intType;
+            return_type = int_type;
             break;
         case RET_CHAR:
-            returnType = charType;
+            return_type = char_type;
             break;
         case RET_FLOAT:
-            returnType = floatType;
+            return_type = float_type;
             break;
         default:
             fprintf(stderr, "[-] Unknown return type for function %s\n",
@@ -37,47 +37,47 @@ static void generateFunctionIR(Function* fun, LLVMContextRef* context,
             exit(1);
     }
 
-    LLVMTypeRef funcType =
-        LLVMFunctionType(returnType, NULL, 0, 0);  // TODO: Add more args
-    LLVMValueRef func = LLVMAddFunction(*module, fun->name, funcType);
-    LLVMBasicBlockRef entry = LLVMAppendBasicBlock(func, "entry");
-    LLVMBuilderRef builder = LLVMCreateBuilder();
+    const LLVMTypeRef funcType =
+        LLVMFunctionType(return_type, NULL, 0, 0);  // TODO: Add more args
+    const LLVMValueRef func = LLVMAddFunction(*module, fun->name, funcType);
+    const LLVMBasicBlockRef entry = LLVMAppendBasicBlock(func, "entry");
+    const LLVMBuilderRef builder = LLVMCreateBuilder();
     LLVMPositionBuilderAtEnd(builder, entry);
 
-    Node* node = fun->body->body;
+    const node_t* node = fun->body->body;
     while (node != NULL) {
         switch (node->type) {
             // TODO: case NO_ASSIGN_INT_NDEF:
             case NO_ASSIGN_INT: {
-                LLVMValueRef var =
-                    LLVMBuildAlloca(builder, intType, node->name);
-                LLVMBuildStore(builder, LLVMConstInt(intType, node->number, 0),
+                const LLVMValueRef var =
+                    LLVMBuildAlloca(builder, int_type, node->name);
+                LLVMBuildStore(builder, LLVMConstInt(int_type, node->number, 0),
                                var);
                 break;
             }
 
             case NO_ASSIGN_FLOAT: {
-                LLVMValueRef var =
-                    LLVMBuildAlloca(builder, floatType, node->name);
+                const LLVMValueRef var =
+                    LLVMBuildAlloca(builder, float_type, node->name);
                 LLVMBuildStore(builder,
-                               LLVMConstReal(floatType, node->floating), var);
+                               LLVMConstReal(float_type, node->floating), var);
 
                 break;
             }
 
             case NO_ASSIGN_CHAR: {
-                LLVMValueRef var =
-                    LLVMBuildAlloca(builder, charType, node->name);
-                LLVMBuildStore(builder, LLVMConstInt(charType, node->letter, 0),
-                               var);
+                const LLVMValueRef var =
+                    LLVMBuildAlloca(builder, char_type, node->name);
+                LLVMBuildStore(builder,
+                               LLVMConstInt(char_type, node->letter, 0), var);
                 break;
             }
             case NO_PRINT: {
-                LLVMValueRef str =
+                const LLVMValueRef str =
                     LLVMBuildGlobalStringPtr(builder, node->name, "str_const");
                 LLVMTypeRef charPtrType = LLVMPointerType(LLVMInt8Type(), 0);
-                LLVMTypeRef putsType =
-                    LLVMFunctionType(intType, &charPtrType, 1, 0);
+                const LLVMTypeRef putsType =
+                    LLVMFunctionType(int_type, &charPtrType, 1, 0);
                 LLVMValueRef putsFunc = LLVMGetNamedFunction(*module, "puts");
                 if (!putsFunc) {
                     putsFunc = LLVMAddFunction(*module, "puts", putsType);
@@ -88,21 +88,21 @@ static void generateFunctionIR(Function* fun, LLVMContextRef* context,
             }
 
             case NO_RETURN: {
-                switch (fun->returnType) {
+                switch (fun->return_type) {
                     case RET_VOID:
                         LLVMBuildRetVoid(builder);
                         break;
                     case RET_INT:
                         LLVMBuildRet(builder,
-                                     LLVMConstInt(intType, node->number, 0));
+                                     LLVMConstInt(int_type, node->number, 0));
                         break;
                     case RET_FLOAT:
                         LLVMBuildRet(builder,
-                                     LLVMConstReal(floatType, node->floating));
+                                     LLVMConstReal(float_type, node->floating));
                         break;
                     case RET_CHAR:
                         LLVMBuildRet(builder,
-                                     LLVMConstInt(charType, node->letter, 0));
+                                     LLVMConstInt(char_type, node->letter, 0));
                         break;
                     default:
                         fprintf(stderr, "[-] Invalid return in %s\n",
@@ -123,19 +123,19 @@ static void generateFunctionIR(Function* fun, LLVMContextRef* context,
     }
 }
 
-void generateLLVM(FunctionList functionList) {
+void generate_llvm(const function_list_t function_list) {
     // Find main function
     LLVMContextRef context = LLVMContextCreate();
-    LLVMModuleRef module = LLVMModuleCreateWithName("module");
-    Function* mainFun = getFunctionByName("main", functionList);
-    if (mainFun == NULL) {
+    const LLVMModuleRef module = LLVMModuleCreateWithName("module");
+    function_t* main_fun = get_function_by_name("main", function_list);
+    if (main_fun == NULL) {
         fprintf(stderr, "[-] Main entry point don't exist \n");
         exit(1);
     }
 
     // Print for debug
     printf("------ IR Generation -------\n");
-    generateFunctionIR(mainFun, &context, &module);
+    generate_function_ir(main_fun, &context, &module);
     char* ir = LLVMPrintModuleToString(module);
     printf("Generated IR:\n%s\n", ir);
     printf("----------------------------\n");
@@ -165,7 +165,7 @@ void generateLLVM(FunctionList functionList) {
         exit(1);
     }
 
-    LLVMTargetMachineRef target_machine =
+    const LLVMTargetMachineRef target_machine =
         LLVMCreateTargetMachine(target, triple, "", "", LLVMCodeGenLevelDefault,
                                 LLVMRelocDefault, LLVMCodeModelDefault);
     LLVMDisposeMessage(triple);
@@ -180,8 +180,8 @@ void generateLLVM(FunctionList functionList) {
 
     // Link the object file
     printf("[+] Linking to create executable...\n");
-    int linkResult = system("clang output.o -o output");
-    if (linkResult != 0) {
+    const int link_result = system("clang output.o -o output");
+    if (link_result != 0) {
         fprintf(stderr, "[-] Linking failed\n");
         exit(1);
     }
