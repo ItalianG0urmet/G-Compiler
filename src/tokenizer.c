@@ -102,6 +102,10 @@ static const char* tokenTypeToString(const TokenType type) {
             return "EMAJOR";
         case TOKEN_NEQUAL:
             return "NEQUAL";
+        case TOKEN_DIVISION:
+            return "DIVISION";
+        case TOKEN_ASTERISK:
+            return "ASTERISK";
         case TOKEN_NOT:
             return "NOT";
         case TOKEN_MAJOR:
@@ -224,7 +228,7 @@ Token* tokenizer(FILE* file) {
         }
 
         // -- Symbols --
-        if (strchr("|=,;{}()>&<!*.+-", current)) {
+        if (strchr("|=,;{}()>&<!*.+-/", current)) {
             if (count > 0) {
                 buffer[count] = '\0';
                 Token temp = firstToken(buffer, current);
@@ -247,6 +251,11 @@ Token* tokenizer(FILE* file) {
                         ungetc(next, file);
                     }
                     break;
+                case '/':
+                    temp.type = TOKEN_DIVISION;
+                    temp.value[0] = '/';
+                    temp.value[1] = '\0';
+                    break;
                 case '+':
                     temp.type = TOKEN_PLUS;
                     temp.value[0] = '+';
@@ -254,7 +263,7 @@ Token* tokenizer(FILE* file) {
                     break;
                 case '-':
                     temp.type = TOKEN_MINUS;
-                    temp.value[0] = '.';
+                    temp.value[0] = '-';
                     temp.value[1] = '\0';
                     break;
                 case '.':
@@ -329,7 +338,7 @@ Token* tokenizer(FILE* file) {
                     temp.value[1] = '\0';
                     break;
                 case '*':
-                    temp.type = TOKEN_POINTER;
+                    temp.type = TOKEN_ASTERISK;
                     temp.value[0] = '*';
                     temp.value[1] = '\0';
                     break;

@@ -29,10 +29,12 @@ typedef enum {
 
     TOKEN_BITWISE_OR,   // |
     TOKEN_BITWISE_AND,  // &
-    TOKEN_POINTER,      // *
+
+    TOKEN_ASTERISK,     // *
 
     TOKEN_PLUS,         // +
     TOKEN_MINUS,        // -
+    TOKEN_DIVISION,     // /
 
     TOKEN_ASSIGN,       // =
     TOKEN_LPAREN,       // (
