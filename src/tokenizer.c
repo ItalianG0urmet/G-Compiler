@@ -67,7 +67,6 @@ static token_t first_token(const char buffer[MAX_TOKEN_VALUE], char current) {
     return temp;
 }
 
-// -- Allocate the token in the list --
 static void push_token(token_t** tokens, const token_t* token,
                        int* tokens_capacity, int* tokens_count) {
     if (*tokens_count >= *tokens_capacity) {
@@ -84,7 +83,6 @@ static void push_token(token_t** tokens, const token_t* token,
     (*tokens_count)++;
 }
 
-// -- Translate the toke type to a string --
 static const char* token_type_to_string(const token_type_t type) {
     switch (type) {
         case TOKEN_EQUAL:
@@ -156,7 +154,6 @@ static const char* token_type_to_string(const token_type_t type) {
     }
 }
 
-// -- Main function of the token class --
 token_t* tokenizer(FILE* file) {
     int tokens_capacity = 16;
     int tokens_count = 0;
@@ -172,7 +169,7 @@ token_t* tokenizer(FILE* file) {
 
     int current;
     while ((current = fgetc(file)) != EOF) {
-        // -- TEXT  --
+        // TEXT
         if (current == '"') {
             token_t temp = {0};
             temp.type = TOKEN_TEXT;
@@ -190,7 +187,7 @@ token_t* tokenizer(FILE* file) {
             continue;
         }
 
-        // -- Letter --
+        // Letter
         if (current == '\'') {
             token_t temp = {0};
             temp.type = TOKEN_LETTER;
@@ -208,7 +205,7 @@ token_t* tokenizer(FILE* file) {
             continue;
         }
 
-        // -- Whitespace --
+        // Whitespace
         if (isspace(current)) {
             if (count > 0) {
                 buffer[count] = '\0';
@@ -220,7 +217,7 @@ token_t* tokenizer(FILE* file) {
             continue;
         }
 
-        // -- Identifiers --
+        // Identifiers
         if (isalpha(current) || current == '_') {
             if (count < sizeof(buffer) - 1) {
                 buffer[count++] = (char)current;
@@ -228,7 +225,7 @@ token_t* tokenizer(FILE* file) {
             continue;
         }
 
-        // -- Digits --
+        // Digits
         if (isdigit(current) || (current == '.' && isdigit(fpeek(file)))) {
             if (count < sizeof(buffer) - 1) {
                 buffer[count++] = (char)current;
@@ -236,7 +233,7 @@ token_t* tokenizer(FILE* file) {
             continue;
         }
 
-        // -- Symbols --
+        // Symbols
         if (strchr("|=,;{}()>&<!*.+-/", current)) {
             if (count > 0) {
                 buffer[count] = '\0';

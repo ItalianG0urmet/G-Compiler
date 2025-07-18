@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-// -- Syntax checking macro --
 #define EXPECT(token_arr, index, expectedType, msg)                \
     if ((token_arr)[index].type != expectedType) {                 \
         fprintf(stderr, "[-] Syntax Error: %s. Found '%s'\n", msg, \
@@ -11,7 +10,6 @@
         exit(1);                                                   \
     }
 
-// -- Check if a ptr in allocated --
 static void check_if_allocated(const void* ptr, const int line) {
     if (ptr == NULL) {
         fprintf(stderr, "[-] Failed to allocate memory, at line %d of %s\n",
@@ -20,7 +18,6 @@ static void check_if_allocated(const void* ptr, const int line) {
     }
 }
 
-// -- Parse the symbols and expression --
 static node_t* parse_expression(const token_t* tokens,
                                 const int* current_index) {
     // TODO: Create expression parser
@@ -31,7 +28,6 @@ static node_t* parse_expression(const token_t* tokens,
 
 static node_t* parse_if(const token_t* tokens, int* current_index);
 
-// -- Transform some tokens into node --
 static node_t* transform_into_node(const token_t* tokens, int* current_index) {
     node_t* node = calloc(1, sizeof(node_t));
     check_if_allocated(node, __LINE__);
@@ -177,7 +173,6 @@ static node_t* transform_into_node(const token_t* tokens, int* current_index) {
     exit(1);
 }
 
-// -- Parse the if statement
 static node_t* parse_if(const token_t* tokens, int* current_index) {
     node_t* node = calloc(1, sizeof(node_t));
     check_if_allocated(node, __LINE__);
@@ -221,12 +216,10 @@ static node_t* parse_if(const token_t* tokens, int* current_index) {
            "expected '}' to close if body")
     (*current_index)++;
 
-    // Attach
     node->then = then_body;
     return node;
 }
 
-// -- Get a function by name --
 function_t* get_function_by_name(const char* name,
                                  const function_list_t function_list) {
     for (int i = 0; i < function_list.count; i++) {
@@ -237,7 +230,6 @@ function_t* get_function_by_name(const char* name,
     return NULL;
 }
 
-// -- Create a function --
 function_t parse_function(const token_t* tokens, int* current_index) {
     token_t identifier = tokens[*current_index + 1];
 
@@ -319,7 +311,6 @@ function_t parse_function(const token_t* tokens, int* current_index) {
     return fun;
 }
 
-// Get args for function
 argument_t* parse_param(const token_t* tokens, const int first_param_index) {
     int index = first_param_index;
     int arg_count = 0;

@@ -8,7 +8,7 @@
 #include "../include/tokenizer.h"
 
 int main(int argc, const char* argv[]) {
-    // -- Tokenizer --
+    // Tokenizer
     FILE* file = fopen(argv[1], "r");
     if (!file) {
         if (argv[1] == NULL)
@@ -21,7 +21,7 @@ int main(int argc, const char* argv[]) {
     const token_t* tokens = tokenizer(file);
     fclose(file);
 
-    // -- AST --
+    // CREATE AST
     printf("------ Instructions -------");
     function_list_t function_list = {.functions = NULL, .count = 0};
     int current_index = 0;
@@ -45,13 +45,7 @@ int main(int argc, const char* argv[]) {
         }
     }
 
-    // Debug
-    for (int i = 0; function_list.count > i; i++) {
-        const function_t* fun = function_list.functions[i];
-        printf("[~] Defined functions: %s \n", fun->name);
-    }
-
-    // -- LLVM --
+    // GENERATE LLVM
     generate_llvm(function_list);
 
     return 0;
