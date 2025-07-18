@@ -5,15 +5,15 @@
 #include <stdlib.h>
 #include <string.h>
 
-// -- Check the next char --
+#define MAX_TOKEN_VALUE 256
+
 static int fpeek(FILE* file) {
     const int c = fgetc(file);
     if (c != EOF) ungetc(c, file);
     return c;
 }
 
-// -- Assign the right token --
-static token_t first_token(const char buffer[256], char current) {
+static token_t first_token(const char buffer[MAX_TOKEN_VALUE], char current) {
     token_t temp;
 
     if (strcmp(buffer, "int") == 0) {
@@ -166,7 +166,7 @@ token_t* tokenizer(FILE* file) {
         exit(1);
     }
 
-    char buffer[256];
+    char buffer[MAX_TOKEN_VALUE];
     int count = 0;
     buffer[0] = '\0';
 
