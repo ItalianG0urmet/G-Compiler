@@ -43,7 +43,7 @@ if(DEBUG)
 endif()
 
 # Base
-file(GLOB SOURCE "src/*.c")
+file(GLOB_RECURSE SOURCE "src/*.c")
 add_executable(compiler ${SOURCE})
 target_link_libraries(compiler PRIVATE ${llvm_libs})
 target_include_directories(compiler PRIVATE include)
