@@ -3,19 +3,38 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define EXPECT(token_arr, index, expectedType, msg)                \
-    if ((token_arr)[index].type != expectedType) {                 \
-        fprintf(stderr, "[-] Syntax Error: %s. Found '%s'\n", msg, \
-                (token_arr)[index].value);                         \
-        exit(1);                                                   \
-    }
+#define EXPECT(tokens, idx, expected, msg)                        \
+    do {                                                          \
+        if ((tokens)[idx].type != (expected))                     \
+            token_failed(tokens, idx, (msg), __FILE__, __LINE__); \
+    } while (0)
+
+__attribute__((noreturn, cold)) static void token_failed(const token_t* tokens,
+                                                         int index,
+                                                         const char* msg,
+                                                         const char* file,
+                                                         int line) {
+    fprintf(stderr, "[-] Syntax Error: %s at %s:%d. Found '%s'\n", msg, file,
+            line, tokens[index].value);
+    exit(1);
+}
+
+__attribute__((noreturn, cold)) static void allocation_failed(const int line) {
+    fprintf(stderr, "[-] Failed to allocate memory, at line %d of %s\n", line,
+            __FILE__);
+    exit(1);
+}
 
 static void check_if_allocated(const void* ptr, const int line) {
     if (ptr == NULL) {
-        fprintf(stderr, "[-] Failed to allocate memory, at line %d of %s\n",
-                line, __FILE__);
-        exit(1);
+        allocation_failed(line);
     }
+}
+
+static int get_node_position(token_type_t type) {
+    if (type == TOKEN_ASTERISK || type == TOKEN_DIVISION) return 1;
+    if (type == TOKEN_PLUS || type == TOKEN_MINUS) return 2;
+    return -1;
 }
 
 static node_t* parse_expression(const token_t* tokens,
@@ -180,15 +199,15 @@ static node_t* parse_if(const token_t* tokens, int* current_index) {
     node->type = NO_IF;
 
     // Syntax check
-    EXPECT(tokens, *current_index + 1, TOKEN_LPAREN, "expected '(' after 'if'")
+    EXPECT(tokens, *current_index + 1, TOKEN_LPAREN, "expected '(' after 'if'");
 
     *current_index += 2;
     node->lnode = parse_expression(tokens, current_index);
 
-    EXPECT(tokens, *current_index, TOKEN_RPAREN, "expected ')' after condition")
+    EXPECT(tokens, *current_index, TOKEN_RPAREN, "expected ')' after condition");
     (*current_index)++;
 
-    EXPECT(tokens, *current_index, TOKEN_LBRACE, "expected '{' after if()")
+    EXPECT(tokens, *current_index, TOKEN_LBRACE, "expected '{' after if()");
     (*current_index)++;
 
     // Generate all the nodes
@@ -213,7 +232,7 @@ static node_t* parse_if(const token_t* tokens, int* current_index) {
 
     // Syntax check
     EXPECT(tokens, *current_index, TOKEN_RBRACE,
-           "expected '}' to close if body")
+           "expected '}' to close if body");
     (*current_index)++;
 
     node->then = then_body;
@@ -265,7 +284,7 @@ function_t parse_function(const token_t* tokens, int* current_index) {
     fun.return_type = return_type;
 
     EXPECT(tokens, *current_index + 1, TOKEN_IDENTIFIER,
-           "invalid function identifier")
+           "invalid function identifier");
 
     strncpy(fun.name, identifier.value, sizeof(fun.name));
 
