@@ -1,53 +1,9 @@
-#include "../include/ast.h"
+#include "../../include/ast.h"
 
 #include <stdlib.h>
 #include <string.h>
 
-#define EXPECT(tokens, idx, expected, msg)                        \
-    do {                                                          \
-        if ((tokens)[idx].type != (expected))                     \
-            token_failed(tokens, idx, (msg), __FILE__, __LINE__); \
-    } while (0)
-
-__attribute__((noreturn, cold)) static void token_failed(const token_t* tokens,
-                                                         int index,
-                                                         const char* msg,
-                                                         const char* file,
-                                                         int line) {
-    fprintf(stderr, "[-] Syntax Error: %s at %s:%d. Found '%s'\n", msg, file,
-            line, tokens[index].value);
-    exit(1);
-}
-
-__attribute__((noreturn, cold)) static void allocation_failed(const int line) {
-    fprintf(stderr, "[-] Failed to allocate memory, at line %d of %s\n", line,
-            __FILE__);
-    exit(1);
-}
-
-static void check_if_allocated(const void* ptr, const int line) {
-    if (ptr == NULL) {
-        allocation_failed(line);
-    }
-}
-
-static int get_node_position(token_type_t type) {
-    if (type == TOKEN_ASTERISK || type == TOKEN_DIVISION) return 1;
-    if (type == TOKEN_PLUS || type == TOKEN_MINUS) return 2;
-    return -1;
-}
-
-static node_t* parse_expression(const token_t* tokens,
-                                const int* current_index) {
-    // TODO: Create expression parser
-    if (tokens[(*current_index + 1)].type != TOKEN_LPAREN) {
-    }
-    return NULL;  // TODO
-}
-
-static node_t* parse_if(const token_t* tokens, int* current_index);
-
-static node_t* transform_into_node(const token_t* tokens, int* current_index) {
+node_t* transform_into_node(const token_t* tokens, int* current_index) {
     node_t* node = calloc(1, sizeof(node_t));
     check_if_allocated(node, __LINE__);
 
@@ -192,53 +148,6 @@ static node_t* transform_into_node(const token_t* tokens, int* current_index) {
     exit(1);
 }
 
-static node_t* parse_if(const token_t* tokens, int* current_index) {
-    node_t* node = calloc(1, sizeof(node_t));
-    check_if_allocated(node, __LINE__);
-
-    node->type = NO_IF;
-
-    // Syntax check
-    EXPECT(tokens, *current_index + 1, TOKEN_LPAREN, "expected '(' after 'if'");
-
-    *current_index += 2;
-    node->lnode = parse_expression(tokens, current_index);
-
-    EXPECT(tokens, *current_index, TOKEN_RPAREN, "expected ')' after condition");
-    (*current_index)++;
-
-    EXPECT(tokens, *current_index, TOKEN_LBRACE, "expected '{' after if()");
-    (*current_index)++;
-
-    // Generate all the nodes
-    node_t* then_body = calloc(1, sizeof(node_t));
-    check_if_allocated(then_body, __LINE__);
-    then_body->type = NO_BODY;
-    node_t* then_last = NULL;
-    while (tokens[*current_index].type != TOKEN_RBRACE &&
-           tokens[*current_index].type != TOKEN_OEF) {
-        node_t* stmt = transform_into_node(tokens, current_index);
-        if (!then_body->body) {
-            then_body->body = stmt;
-        } else {
-            if (then_last == NULL) {
-                fprintf(stderr, "[-] then_last is null\n");
-                exit(1);
-            }
-            then_last->next = stmt;
-        }
-        then_last = stmt;
-    }
-
-    // Syntax check
-    EXPECT(tokens, *current_index, TOKEN_RBRACE,
-           "expected '}' to close if body");
-    (*current_index)++;
-
-    node->then = then_body;
-    return node;
-}
-
 function_t* get_function_by_name(const char* name,
                                  const function_list_t function_list) {
     for (int i = 0; i < function_list.count; i++) {
@@ -370,7 +279,7 @@ argument_t* parse_param(const token_t* tokens, const int first_param_index) {
             default:
                 fprintf(stderr, "[-] Invalid param: %s\n", tokens[index].value);
                 exit(1);
-        }
+       }
 
         index += 2;
         arguments[arg_index++] = arg;
