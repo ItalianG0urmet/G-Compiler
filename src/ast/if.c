@@ -1,13 +1,13 @@
 #include "../../include/if.h"
 
 // TODO
-static node_t* parse_expression(const token_t* tokens, int* current_index){
+static struct Node* parse_expression(const token_t* tokens, int* current_index){
 
 
 }
 
-node_t* parse_if(const token_t* tokens, int* current_index) {
-    node_t* node = calloc(1, sizeof(node_t));
+struct Node* parse_if(const token_t* tokens, int* current_index) {
+    struct Node* node = calloc(1, sizeof(struct Node));
     check_if_allocated(node, __LINE__);
 
     node->type = NO_IF;
@@ -25,13 +25,13 @@ node_t* parse_if(const token_t* tokens, int* current_index) {
     (*current_index)++;
 
     // Generate all the nodes
-    node_t* then_body = calloc(1, sizeof(node_t));
+    struct Node* then_body = calloc(1, sizeof(struct Node));
     check_if_allocated(then_body, __LINE__);
     then_body->type = NO_BODY;
-    node_t* then_last = NULL;
+    struct Node* then_last = NULL;
     while (tokens[*current_index].type != TOKEN_RBRACE &&
            tokens[*current_index].type != TOKEN_OEF) {
-        node_t* stmt = transform_into_node(tokens, current_index);
+        struct Node* stmt = transform_into_node(tokens, current_index);
         if (!then_body->body) {
             then_body->body = stmt;
         } else {

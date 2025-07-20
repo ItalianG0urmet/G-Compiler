@@ -6,7 +6,7 @@ static int get_node_position(token_type_t type) {
     return -1;
 }
 
-node_t* parse_expression(const token_t* tokens,
+struct Node* parse_expression(const token_t* tokens,
                                 const int* current_index) {
     // TODO: Create expression parser
     if (tokens[(*current_index + 1)].type != TOKEN_LPAREN) {

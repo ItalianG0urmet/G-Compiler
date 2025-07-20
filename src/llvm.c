@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-static void generate_function_ir(function_t* fun, LLVMContextRef* context,
+static void generate_function_ir(struct Function* fun, LLVMContextRef* context,
                                  const LLVMModuleRef* module) {
     // Default types
     const LLVMTypeRef void_type = LLVMVoidType();
@@ -44,7 +44,7 @@ static void generate_function_ir(function_t* fun, LLVMContextRef* context,
     const LLVMBuilderRef builder = LLVMCreateBuilder();
     LLVMPositionBuilderAtEnd(builder, entry);
 
-    const node_t* node = fun->body->body;
+    const struct Node* node = fun->body->body;
     while (node != NULL) {
         switch (node->type) {
             // TODO: case NO_ASSIGN_INT_NDEF:
@@ -123,11 +123,11 @@ static void generate_function_ir(function_t* fun, LLVMContextRef* context,
     }
 }
 
-void generate_llvm(const function_list_t function_list) {
+void generate_llvm(const struct Function_list function_list) {
     // Find main function
     LLVMContextRef context = LLVMContextCreate();
     const LLVMModuleRef module = LLVMModuleCreateWithName("module");
-    function_t* main_fun = get_function_by_name("main", function_list);
+    struct Function* main_fun = get_function_by_name("main", function_list);
     if (main_fun == NULL) {
         fprintf(stderr, "[-] Main entry point don't exist \n");
         exit(1);

@@ -3,8 +3,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-node_t* transform_into_node(const token_t* tokens, int* current_index) {
-    node_t* node = calloc(1, sizeof(node_t));
+struct Node* transform_into_node(const token_t* tokens, int* current_index) {
+    struct Node* node = calloc(1, sizeof(struct Node));
     check_if_allocated(node, __LINE__);
 
     // If
@@ -148,8 +148,8 @@ node_t* transform_into_node(const token_t* tokens, int* current_index) {
     exit(1);
 }
 
-function_t* get_function_by_name(const char* name,
-                                 const function_list_t function_list) {
+struct Function* get_function_by_name(const char* name,
+                                 const struct Function_list function_list) {
     for (int i = 0; i < function_list.count; i++) {
         if (strcmp(function_list.functions[i]->name, name) == 0) {
             return function_list.functions[i];
@@ -158,11 +158,11 @@ function_t* get_function_by_name(const char* name,
     return NULL;
 }
 
-function_t parse_function(const token_t* tokens, int* current_index) {
+struct Function parse_function(const token_t* tokens, int* current_index) {
     token_t identifier = tokens[*current_index + 1];
 
     // Find return type
-    fun_return_type_t return_type;
+    enum Function_return_type return_type;
     switch (tokens[*current_index].type) {
         case TOKEN_VOID:
             return_type = RET_VOID;
@@ -183,12 +183,12 @@ function_t parse_function(const token_t* tokens, int* current_index) {
     }
 
     // Parse the args and define
-    argument_t* args = parse_param(tokens, *current_index + 3);
+    struct Argument* args = parse_param(tokens, *current_index + 3);
     while (tokens[*current_index].type == TOKEN_LBRACE) {
         (*current_index)++;
     }
 
-    function_t fun;
+    struct Function fun;
     fun.arguments = args;
     fun.return_type = return_type;
 
@@ -204,15 +204,15 @@ function_t parse_function(const token_t* tokens, int* current_index) {
     (*current_index)++;
 
     // Start node transformation
-    node_t* body = calloc(1, sizeof(node_t));
+    struct Node* body = calloc(1, sizeof(struct Node));
     check_if_allocated(body, __LINE__);
     body->type = NO_BODY;
-    node_t* last = NULL;
+    struct Node* last = NULL;
     int node_count = 0;
     printf("\n[+] Defining function %s [+]\n", fun.name);
     while (tokens[*current_index].type != TOKEN_RBRACE &&
            tokens[*current_index].type != TOKEN_OEF) {
-        node_t* node = transform_into_node(tokens, current_index);
+        struct Node* node = transform_into_node(tokens, current_index);
 
         if (body->body == NULL) {
             body->body = node;
@@ -239,7 +239,7 @@ function_t parse_function(const token_t* tokens, int* current_index) {
     return fun;
 }
 
-argument_t* parse_param(const token_t* tokens, const int first_param_index) {
+struct Argument* parse_param(const token_t* tokens, const int first_param_index) {
     int index = first_param_index;
     int arg_count = 0;
 
@@ -257,14 +257,14 @@ argument_t* parse_param(const token_t* tokens, const int first_param_index) {
         }
     }
 
-    argument_t* arguments = calloc(arg_count, sizeof(argument_t));
+    struct Argument* arguments = calloc(arg_count, sizeof(struct Argument));
     check_if_allocated(arguments, __LINE__);
 
     index = first_param_index;
     int arg_index = 0;
     while (tokens[index].type != TOKEN_RPAREN &&
            tokens[index].type != TOKEN_OEF) {
-        argument_t arg;
+        struct Argument arg;
 
         switch (tokens[index].type) {
             case TOKEN_INT:
@@ -292,10 +292,10 @@ argument_t* parse_param(const token_t* tokens, const int first_param_index) {
     return arguments;
 }
 
-void add_function_to_list(function_t* fun, function_list_t* function_list) {
+void add_function_to_list(struct Function* fun, struct Function_list* function_list) {
     function_list->functions =
         realloc(function_list->functions,
-                sizeof(function_t*) * (function_list->count + 1));
+                sizeof(struct Function*) * (function_list->count + 1));
 
     if (!function_list->functions) {
         fprintf(stderr, "[-] Error reallocating memory for function list\n");
