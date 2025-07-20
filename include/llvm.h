@@ -3,6 +3,6 @@
 
 #include "../include/ast.h"
 
-void generate_llvm(struct Node_list function_list);
+void generate_llvm(struct Function_list function_list);
 
 #endif

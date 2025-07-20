@@ -123,7 +123,7 @@ static void generate_function_ir(struct Function* fun, LLVMContextRef* context,
     }
 }
 
-void generate_llvm(const struct Function_list function_list) {
+void generate_llvm(struct Function_list function_list){
     // Find main function
     LLVMContextRef context = LLVMContextCreate();
     const LLVMModuleRef module = LLVMModuleCreateWithName("module");
