@@ -13,8 +13,8 @@ static int fpeek(FILE* file) {
     return c;
 }
 
-static token_t first_token(const char buffer[MAX_TOKEN_VALUE], char current) {
-    token_t temp;
+static struct Token first_token(const char buffer[MAX_TOKEN_VALUE], char current) {
+    struct Token temp;
 
     if (strcmp(buffer, "int") == 0) {
         temp.type = TOKEN_INT;
@@ -67,12 +67,12 @@ static token_t first_token(const char buffer[MAX_TOKEN_VALUE], char current) {
     return temp;
 }
 
-static void push_token(token_t** tokens, const token_t* token,
+static void push_token(struct Token** tokens, const struct Token* token,
                        int* tokens_capacity, int* tokens_count) {
     if (*tokens_count >= *tokens_capacity) {
         *tokens_capacity *= 2;
-        token_t* new_tokens =
-            realloc(*tokens, sizeof(token_t) * (*tokens_capacity));
+        struct Token* new_tokens =
+            realloc(*tokens, sizeof(struct Token) * (*tokens_capacity));
         if (!new_tokens) {
             perror("[-] Can't allocate new space \n");
             exit(1);
@@ -83,7 +83,7 @@ static void push_token(token_t** tokens, const token_t* token,
     (*tokens_count)++;
 }
 
-static const char* token_type_to_string(const token_type_t type) {
+static const char* token_type_to_string(const enum Token_type type) {
     switch (type) {
         case TOKEN_EQUAL:
             return "EQUAL";
@@ -154,10 +154,10 @@ static const char* token_type_to_string(const token_type_t type) {
     }
 }
 
-token_t* tokenizer(FILE* file) {
+struct Token* tokenizer(FILE* file) {
     int tokens_capacity = 16;
     int tokens_count = 0;
-    token_t* tokens = malloc(sizeof(token_t) * tokens_capacity);
+    struct Token* tokens = malloc(sizeof(struct Token) * tokens_capacity);
     if (tokens == NULL) {
         fprintf(stderr, "[-] Can't allocate memory for token");
         exit(1);
@@ -171,7 +171,7 @@ token_t* tokenizer(FILE* file) {
     while ((current = fgetc(file)) != EOF) {
         // TEXT
         if (current == '"') {
-            token_t temp = {0};
+            struct Token temp = {0};
             temp.type = TOKEN_TEXT;
             int i = 0;
 
@@ -189,7 +189,7 @@ token_t* tokenizer(FILE* file) {
 
         // Letter
         if (current == '\'') {
-            token_t temp = {0};
+            struct Token temp = {0};
             temp.type = TOKEN_LETTER;
             int i = 0;
 
@@ -209,7 +209,7 @@ token_t* tokenizer(FILE* file) {
         if (isspace(current)) {
             if (count > 0) {
                 buffer[count] = '\0';
-                token_t temp = first_token(buffer, current);
+                struct Token temp = first_token(buffer, current);
                 push_token(&tokens, &temp, &tokens_capacity, &tokens_count);
                 count = 0;
                 buffer[0] = '\0';
@@ -237,13 +237,13 @@ token_t* tokenizer(FILE* file) {
         if (strchr("|=,;{}()>&<!*.+-/", current)) {
             if (count > 0) {
                 buffer[count] = '\0';
-                token_t temp = first_token(buffer, current);
+                struct Token temp = first_token(buffer, current);
                 push_token(&tokens, &temp, &tokens_capacity, &tokens_count);
                 count = 0;
                 buffer[0] = '\0';
             }
             int next;
-            token_t temp = {0};
+            struct Token temp = {0};
             switch (current) {
                 case '|':
                     next = fgetc(file);
@@ -397,14 +397,14 @@ token_t* tokenizer(FILE* file) {
     // If buffer has leftover data at EOF
     if (count > 0) {
         buffer[count] = '\0';
-        token_t temp = first_token(buffer, '\0');
+        struct Token temp = first_token(buffer, '\0');
         push_token(&tokens, &temp, &tokens_capacity, &tokens_count);
         printf("[EOF-TOKEN] %s [%s]\n", temp.value,
                token_type_to_string(temp.type));
     }
 
     // Add OEF token
-    token_t finish = {0};
+    struct Token finish = {0};
     finish.type = TOKEN_OEF;
     strcpy(finish.value, "404");
     push_token(&tokens, &finish, &tokens_capacity, &tokens_count);

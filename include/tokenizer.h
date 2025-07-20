@@ -3,7 +3,7 @@
 
 #include <stdio.h>
 
-typedef enum {
+enum Token_type {
     TOKEN_IDENTIFIER,  // identifier
     TOKEN_VOID,        // void
     TOKEN_INT,         // 0
@@ -43,13 +43,13 @@ typedef enum {
     TOKEN_END,     // ;
 
     TOKEN_OEF,
-} token_type_t;
+};
 
-typedef struct {
-    token_type_t type;
+struct Token {
+    enum Token_type type;
     char value[256];
-} token_t;
+};
 
-token_t* tokenizer(FILE* file);
+struct Token* tokenizer(FILE* file);
 
 #endif

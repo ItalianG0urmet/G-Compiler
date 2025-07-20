@@ -10,7 +10,7 @@
             token_failed(tokens, idx, (msg), __FILE__, __LINE__); \
     } while (0)
 
-__attribute__((noreturn, cold)) void token_failed(const token_t* tokens,
+__attribute__((noreturn, cold)) void token_failed(const struct Token* tokens,
                                                          int index,
                                                          const char* msg,
                                                          const char* file,

@@ -1,6 +1,6 @@
 #include "../../include/ast_utils.h"
 
-__attribute__((noreturn, cold)) void token_failed(const token_t* tokens,
+__attribute__((noreturn, cold)) void token_failed(const struct Token* tokens,
                                                          int index,
                                                          const char* msg,
                                                          const char* file,

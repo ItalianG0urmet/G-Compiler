@@ -18,7 +18,7 @@ int main(int argc, const char* argv[]) {
 
         return 1;
     }
-    const token_t* tokens = tokenizer(file);
+    const struct Token* tokens = tokenizer(file);
     fclose(file);
 
     // CREATE AST
@@ -26,7 +26,7 @@ int main(int argc, const char* argv[]) {
     struct Function_list function_list = {.functions = NULL, .count = 0};
     int current_index = 0;
     while (tokens[current_index].type != TOKEN_OEF) {
-        const token_t current_token = tokens[current_index];
+        const struct Token current_token = tokens[current_index];
         if ((current_token.type == TOKEN_INT ||
              current_token.type == TOKEN_FLOAT ||
              current_token.type == TOKEN_CHAR ||

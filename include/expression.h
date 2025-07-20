@@ -4,7 +4,7 @@
 #include "ast_types.h"
 #include "tokenizer.h"
 
-struct Node* parse_expression(const token_t* tokens,
+struct Node* parse_expression(const struct Token* tokens,
                                 const int* current_index);
 
 #endif

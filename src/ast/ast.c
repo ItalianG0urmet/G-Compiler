@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-struct Node* transform_into_node(const token_t* tokens, int* current_index) {
+struct Node* transform_into_node(const struct Token* tokens, int* current_index) {
     struct Node* node = calloc(1, sizeof(struct Node));
     check_if_allocated(node, __LINE__);
 
@@ -148,8 +148,8 @@ struct Node* transform_into_node(const token_t* tokens, int* current_index) {
     exit(1);
 }
 
-struct Function* get_function_by_name(const char* name,
-                                 const struct Function_list function_list) {
+struct Function* get_function_by_name(
+    const char* name, const struct Function_list function_list) {
     for (int i = 0; i < function_list.count; i++) {
         if (strcmp(function_list.functions[i]->name, name) == 0) {
             return function_list.functions[i];
@@ -158,8 +158,8 @@ struct Function* get_function_by_name(const char* name,
     return NULL;
 }
 
-struct Function parse_function(const token_t* tokens, int* current_index) {
-    token_t identifier = tokens[*current_index + 1];
+struct Function parse_function(const struct Token* tokens, int* current_index) {
+    struct Token identifier = tokens[*current_index + 1];
 
     // Find return type
     enum Function_return_type return_type;
@@ -239,7 +239,8 @@ struct Function parse_function(const token_t* tokens, int* current_index) {
     return fun;
 }
 
-struct Argument* parse_param(const token_t* tokens, const int first_param_index) {
+struct Argument* parse_param(const struct Token* tokens,
+                             const int first_param_index) {
     int index = first_param_index;
     int arg_count = 0;
 
@@ -279,7 +280,7 @@ struct Argument* parse_param(const token_t* tokens, const int first_param_index)
             default:
                 fprintf(stderr, "[-] Invalid param: %s\n", tokens[index].value);
                 exit(1);
-       }
+        }
 
         index += 2;
         arguments[arg_index++] = arg;
@@ -292,7 +293,8 @@ struct Argument* parse_param(const token_t* tokens, const int first_param_index)
     return arguments;
 }
 
-void add_function_to_list(struct Function* fun, struct Function_list* function_list) {
+void add_function_to_list(struct Function* fun,
+                          struct Function_list* function_list) {
     function_list->functions =
         realloc(function_list->functions,
                 sizeof(struct Function*) * (function_list->count + 1));

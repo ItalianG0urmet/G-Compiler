@@ -5,8 +5,8 @@
 #include "ast_utils.h"
 #include <stdlib.h>
 
-struct Node* transform_into_node(const token_t* tokens, int* current_index);
-struct Node* parse_if(const token_t* tokens, int* current_index);
+struct Node* transform_into_node(const struct Token* tokens, int* current_index);
+struct Node* parse_if(const struct Token* tokens, int* current_index);
 
 
 #endif

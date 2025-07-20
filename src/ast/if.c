@@ -1,12 +1,12 @@
 #include "../../include/if.h"
 
 // TODO
-static struct Node* parse_expression(const token_t* tokens, int* current_index){
+static struct Node* parse_expression(const struct Token* tokens, int* current_index){
 
 
 }
 
-struct Node* parse_if(const token_t* tokens, int* current_index) {
+struct Node* parse_if(const struct Token* tokens, int* current_index) {
     struct Node* node = calloc(1, sizeof(struct Node));
     check_if_allocated(node, __LINE__);
 
