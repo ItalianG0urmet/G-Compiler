@@ -6,10 +6,10 @@
 #include "if.h"
 #include "expression.h"
 
-node_t* transform_into_node(const token_t* tokens, int* current_index);
-function_t* get_function_by_name(const char* name, function_list_t function_list);
-argument_t* parse_param(const token_t* tokens, int first_param_index);
-function_t parse_function(const token_t* tokens, int* current_index);
-void add_function_to_list(function_t* fun, function_list_t* function_list);
+struct Node* transform_into_node(const token_t* tokens, int* current_index);
+struct Function* get_function_by_name(const char* name, struct Function_list function_list);
+struct Argument* parse_param(const token_t* tokens, int first_param_index);
+struct Function parse_function(const token_t* tokens, int* current_index);
+void add_function_to_list(struct Function* fun, struct Function_list* function_list);
 
 #endif

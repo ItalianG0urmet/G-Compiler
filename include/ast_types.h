@@ -3,22 +3,22 @@
 
 #include "tokenizer.h"
 
-typedef enum {
+enum Argument_type {
     ARG_INT,
     ARG_FLOAT,
     ARG_CHAR,
-} argument_type_t;
+};
 
-typedef struct {
-    argument_type_t type;
+struct Argument {
+    enum Argument_type type;
     union {
         int i;
         float f;
         char str;
     };
-} argument_t;
+};
 
-typedef enum {
+enum Node_type {
     NO_BODY,
 
     NO_ADD,
@@ -43,23 +43,21 @@ typedef enum {
     NO_WHILE,
     NO_FOR,
     NO_FUNCALL
-} node_type_t;
-
-typedef struct Node node_t;
+};
 
 struct Node {
-    node_type_t type;
-    node_t* lnode;
-    node_t* rnode;
+    enum Node_type type;
+    struct Node* lnode;
+    struct Node* rnode;
 
-    node_t* code;  // IF, FOR
-    node_t* then;  // IF or FOR body
-    node_t* els;   // ELSE
-    node_t* init;  // INIT FOR
-    node_t* inc;   // INCREMENT FOR
+    struct Node* code;  // IF, FOR
+    struct Node* then;  // IF or FOR body
+    struct Node* els;   // ELSE
+    struct Node* init;  // INIT FOR
+    struct Node* inc;   // INCREMENT FOR
 
-    node_t* body;  // Point to the first node
-    node_t* next;  // Point to the next node
+    struct Node* body;  // Point to the first node
+    struct Node* next;  // Point to the next node
 
     char name[256];  // Name of var or Name of text
     union {
@@ -69,19 +67,21 @@ struct Node {
     };
 };
 
-typedef enum { RET_INT, RET_CHAR, RET_FLOAT, RET_VOID } fun_return_type_t;
+enum Function_return_type {
+    RET_INT, RET_CHAR, RET_FLOAT, RET_VOID
+};
 
-typedef struct {
-    fun_return_type_t return_type;
-    node_t* body;
+struct Function {
+    enum Function_return_type return_type;
+    struct Node* body;
     int node_count;
-    argument_t* arguments;
+    struct Argument* arguments;
     char name[256];
-} function_t;
+};
 
-typedef struct {
-    function_t** functions;
+struct Function_list {
+    struct Function** functions;
     int count;
-} function_list_t;
+};
 
 #endif
