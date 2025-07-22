@@ -5,7 +5,7 @@ __attribute__((noreturn, cold)) static void file_not_found_error(
     if (file_path == NULL)
         fprintf(stderr, "[-] You should specify an argument \n");
     else
-        fprintf(stderr, "[-] Can't find %s \n", file_path);
+        fprintf(stderr, "[-] Can't find the file %s \n", file_path);
     exit(1);
 }
 
@@ -14,11 +14,22 @@ __attribute__((noreturn, cold)) static void memory_allocation_error() {
     exit(1);
 }
 
-static struct Token* get_tokens(const char* file_path) {
+static struct Token* get_tokens(const char* file_path, bool debug_active) {
     FILE* file = fopen(file_path, "r");
     if (!file) file_not_found_error(file_path);
     struct Token* tokens = tokenizer(file);
     fclose(file);
+
+    if (debug_active) {
+        printf("\n=========================");
+        printf("\nGenerated tokens:\n");
+        for (int i = 0; tokens[i].type != TOKEN_OEF; i++) {
+            printf("  [%02d] %s, %s\n", i, tokens[i].value,
+                   token_type_to_string(tokens[i].type));
+        }
+        printf("=========================\n\n");
+    }
+
     return tokens;
 }
 
@@ -45,8 +56,11 @@ static struct Function_list parse_functions(const struct Token* tokens) {
     return function_list;
 }
 
-void compile_file(const char* file_path) {
-    const struct Token* tokens = get_tokens(file_path);
+void compile_file(const char* file_path, const char* file_output, bool debug_active) {
+    printf("[+] Generating tokens... \n");
+    const struct Token* tokens = get_tokens(file_path, debug_active);
+    printf("[+] Parsing tokens... \n");
     const struct Function_list function_list = parse_functions(tokens);
-    generate_llvm(function_list);
+    printf("[+] Generating llvm... \n");
+    generate_llvm(function_list, file_output, debug_active);
 }

@@ -2,13 +2,11 @@
 #define COMPILER_H
 
 #include <llvm-c/BitWriter.h>
-#include <stdio.h>
-#include <string.h>
+#include <stdbool.h>
 
-#include "ast.h"
+#include "lexer_utils.h"
 #include "llvm.h"
-#include "lexer.h"
 
-void compile_file(const char* file_path);
+void compile_file(const char* file_path, const char* file_output, bool debug_active);
 
 #endif

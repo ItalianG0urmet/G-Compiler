@@ -1,10 +1,13 @@
 #include <llvm-c/BitWriter.h>
 
 #include "../include/compiler.h"
+#include "../include/args_manager.h"
 
 int main(int argc, const char* argv[]) {
 
-    compile_file(argv[1]);
+    struct Flags flags = get_arguments_flags(argc, argv);
+    compile_file(flags.file_name, flags.output_name, flags.debug_active);
+    return 0;
 
     return 0;
 }

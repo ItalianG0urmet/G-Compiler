@@ -123,7 +123,8 @@ static void generate_function_ir(struct Function* fun, LLVMContextRef* context,
     }
 }
 
-void generate_llvm(struct Function_list function_list){
+void generate_llvm(struct Function_list function_list, const char* output_file,
+                   bool debug_active) {
     // Find main function
     LLVMContextRef context = LLVMContextCreate();
     const LLVMModuleRef module = LLVMModuleCreateWithName("module");
@@ -134,12 +135,13 @@ void generate_llvm(struct Function_list function_list){
     }
 
     // Print for debug
-    printf("------ IR Generation -------\n");
     generate_function_ir(main_fun, &context, &module);
-    char* ir = LLVMPrintModuleToString(module);
-    printf("Generated IR:\n%s\n", ir);
-    printf("----------------------------\n");
-    LLVMDisposeMessage(ir);
+    if (debug_active) {
+        char* ir = LLVMPrintModuleToString(module);
+        printf("\n=== Generated LLVM IR ===\n%s", ir);
+        printf("=========================\n\n");
+        LLVMDisposeMessage(ir);
+    }
 
     // Module validation
     char* verify_error = NULL;
@@ -179,14 +181,18 @@ void generate_llvm(struct Function_list function_list){
     }
 
     // Link the object file
+    char link_command[1024];
+    snprintf(link_command, sizeof(link_command), "clang output.o -o %s",
+             output_file);
+
     printf("[+] Linking to create executable...\n");
-    const int link_result = system("clang output.o -o output");
+    const int link_result = system(link_command);
     if (link_result != 0) {
         fprintf(stderr, "[-] Linking failed\n");
         exit(1);
     }
 
-    printf("[+] Executable 'output' created successfully!\n");
+    printf("[+] Executable '%s' created successfully!\n", output_file);
 
     // Cleanup
     LLVMDisposeModule(module);

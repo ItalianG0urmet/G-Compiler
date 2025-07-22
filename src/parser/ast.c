@@ -22,7 +22,6 @@ struct Node* transform_into_node(const struct Token* tokens, int* current_index)
                 strncpy(node->name, tokens[*current_index + 1].value,
                         sizeof(node->name));
                 node->type = NO_ASSIGN_FLOAT;
-                printf("[+] Added not defined float named %s \n", node->name);
                 *current_index += 3;
                 return node;
             }
@@ -34,8 +33,6 @@ struct Node* transform_into_node(const struct Token* tokens, int* current_index)
                         sizeof(node->name));
                 node->type = NO_ASSIGN_FLOAT;
                 node->floating = atof(tokens[*current_index + 3].value);
-                printf("[+] Added defined float named %s with value %f\n",
-                       node->name, node->floating);
                 *current_index += 5;
                 return node;
             }
@@ -52,7 +49,6 @@ struct Node* transform_into_node(const struct Token* tokens, int* current_index)
                 strncpy(node->name, tokens[*current_index + 1].value,
                         sizeof(node->name));
                 node->type = NO_ASSIGN_INT;
-                printf("[+] Added not defined int named %s \n", node->name);
                 *current_index += 3;
                 return node;
             }
@@ -63,7 +59,6 @@ struct Node* transform_into_node(const struct Token* tokens, int* current_index)
                             sizeof(node->name));
                     node->type = NO_ASSIGN_INT;
                     node->number = atoi(tokens[*current_index + 3].value);
-                    printf("[+] Added defined int named %s \n", node->name);
                     *current_index += 5;
                     return node;
                 }
@@ -80,7 +75,6 @@ struct Node* transform_into_node(const struct Token* tokens, int* current_index)
         tokens[*current_index + 1].type == TOKEN_INCREMENT &&
         tokens[*current_index + 2].type == TOKEN_END) {
         node->type = NO_INCREMENT;
-        printf("[+] Added increment for %s \n", tokens[*current_index].value);
         *current_index += 3;
         return node;
     }
@@ -92,7 +86,6 @@ struct Node* transform_into_node(const struct Token* tokens, int* current_index)
             strncpy(node->name, tokens[*current_index + 1].value,
                     sizeof(node->name));
             node->type = NO_ASSIGN_CHAR;
-            printf("[+] Added not defined char named %s \n", node->name);
             *current_index += 3;
             return node;
         }
@@ -102,8 +95,6 @@ struct Node* transform_into_node(const struct Token* tokens, int* current_index)
                     sizeof(node->name));
             node->type = NO_ASSIGN_CHAR;
             node->letter = tokens[*current_index + 3].value[0];
-            printf("[+] Added defined char named %s with value '%c'\n",
-                   node->name, node->letter);
             *current_index += 5;
             return node;
         }
@@ -119,7 +110,6 @@ struct Node* transform_into_node(const struct Token* tokens, int* current_index)
             const int return_code = atoi(tokens[*current_index + 1].value);
             node->type = NO_RETURN;
             node->number = return_code;
-            printf("[+] Added return type, that return %d \n", return_code);
             *current_index += 3;
             return node;
         }
@@ -135,7 +125,6 @@ struct Node* transform_into_node(const struct Token* tokens, int* current_index)
             strncpy(node->name, tokens[*current_index].value,
                     sizeof(node->name));
             *current_index += 2;
-            printf("[+] Added text type, that contains \"%s\" \n", node->name);
             return node;
         }
     }
@@ -209,7 +198,6 @@ struct Function parse_function(const struct Token* tokens, int* current_index) {
     body->type = NO_BODY;
     struct Node* last = NULL;
     int node_count = 0;
-    printf("\n[+] Defining function %s [+]\n", fun.name);
     while (tokens[*current_index].type != TOKEN_RBRACE &&
            tokens[*current_index].type != TOKEN_OEF) {
         struct Node* node = transform_into_node(tokens, current_index);
@@ -234,7 +222,6 @@ struct Function parse_function(const struct Token* tokens, int* current_index) {
 
     fun.body = body;
     fun.node_count = node_count;
-    printf("[*] %s function have %d nodes \n", fun.name, fun.node_count);
     (*current_index)++;
     return fun;
 }
