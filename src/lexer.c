@@ -65,7 +65,7 @@ static struct Token first_token(const char buffer[MAX_TOKEN_VALUE], char current
         }
     }
 
-    strcpy(temp.value, buffer);
+    strncpy(temp.value, buffer, sizeof(temp.value));
     return temp;
 }
 
@@ -251,7 +251,7 @@ struct Token* tokenizer(FILE* file) {
                     next = fgetc(file);
                     if (next == '|') {
                         temp.type = TOKEN_OR;
-                        strcpy(temp.value, "||");
+                        strncpy(temp.value, "||", sizeof(temp.value));
                     } else {
                         temp.type = TOKEN_BITWISE_OR;
                         temp.value[0] = '|';
@@ -268,7 +268,7 @@ struct Token* tokenizer(FILE* file) {
                     next = fgetc(file);
                     if (next == '+') {
                         temp.type = TOKEN_INCREMENT;
-                        strcpy(temp.value, "++");
+                        strncpy(temp.value, "++", sizeof(temp.value));
                     } else {
                         temp.type = TOKEN_PLUS;
                         temp.value[0] = '+';
@@ -290,7 +290,7 @@ struct Token* tokenizer(FILE* file) {
                     next = fgetc(file);
                     if (next == '=') {
                         temp.type = TOKEN_EMAJOR;
-                        strcpy(temp.value, ">=");
+                        strncpy(temp.value, ">=", sizeof(temp.value));
                     } else {
                         temp.type = TOKEN_MAJOR;
                         temp.value[0] = '>';
@@ -302,7 +302,7 @@ struct Token* tokenizer(FILE* file) {
                     next = fgetc(file);
                     if (next == '=') {
                         temp.type = TOKEN_EMINOR;
-                        strcpy(temp.value, "<=");
+                        strncpy(temp.value, "<=", sizeof(temp.value));
                     } else {
                         temp.type = TOKEN_MINOR;
                         temp.value[0] = '<';
@@ -314,7 +314,7 @@ struct Token* tokenizer(FILE* file) {
                     next = fgetc(file);
                     if (next == '=') {
                         temp.type = TOKEN_EQUAL;
-                        strcpy(temp.value, "==");
+                        strncpy(temp.value, "==", sizeof(temp.value));
                     } else {
                         temp.type = TOKEN_ASSIGN;
                         temp.value[0] = '=';
@@ -361,7 +361,7 @@ struct Token* tokenizer(FILE* file) {
                     next = fgetc(file);
                     if (next == '=') {
                         temp.type = TOKEN_NEQUAL;
-                        strcpy(temp.value, "!=");
+                        strncpy(temp.value, "!=", sizeof(temp.value));
                     } else {
                         temp.type = TOKEN_NOT;
                         temp.value[0] = '!';
@@ -373,7 +373,7 @@ struct Token* tokenizer(FILE* file) {
                     next = fgetc(file);
                     if (next == '&') {
                         temp.type = TOKEN_AND;
-                        strcpy(temp.value, "&&");
+                        strncpy(temp.value, "&&", sizeof(temp.value));
                     } else {
                         temp.type = TOKEN_BITWISE_AND;
                         temp.value[0] = '&';
@@ -408,7 +408,7 @@ struct Token* tokenizer(FILE* file) {
     // Add OEF token
     struct Token finish = {0};
     finish.type = TOKEN_OEF;
-    strcpy(finish.value, "404");
+    strncpy(finish.value, "404", sizeof(finish.value));
     push_token(&tokens, &finish, &tokens_capacity, &tokens_count);
 
     // Print all tokens
