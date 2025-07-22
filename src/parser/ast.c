@@ -258,8 +258,11 @@ struct Argument* parse_param(const struct Token* tokens,
         }
     }
 
-    struct Argument* arguments = calloc(arg_count, sizeof(struct Argument));
-    check_if_allocated(arguments, __LINE__);
+    struct Argument* arguments = NULL;
+    if (arg_count > 0) {
+        arguments = calloc(arg_count, sizeof(struct Argument));
+        check_if_allocated(arguments, __LINE__);
+    }
 
     index = first_param_index;
     int arg_index = 0;
