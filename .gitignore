@@ -1,4 +1,8 @@
 build/
+.cache/
+
+test.g
+compile_commands.json
 
 *.o
 *.asm
