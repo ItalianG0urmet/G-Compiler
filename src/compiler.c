@@ -38,6 +38,7 @@ static struct Function_list parse_functions(const struct Token* tokens) {
     int current_index = 0;
     while (tokens[current_index].type != TOKEN_OEF) {
         const struct Token current_token = tokens[current_index];
+        // Check for valid return type and parse the function
         if ((current_token.type == TOKEN_INT ||
              current_token.type == TOKEN_FLOAT ||
              current_token.type == TOKEN_CHAR ||
@@ -56,7 +57,8 @@ static struct Function_list parse_functions(const struct Token* tokens) {
     return function_list;
 }
 
-void compile_file(const char* file_path, const char* file_output, bool debug_active) {
+void compile_file(const char* file_path, const char* file_output,
+                  bool debug_active) {
     printf("[+] Generating tokens... \n");
     const struct Token* tokens = get_tokens(file_path, debug_active);
     printf("[+] Parsing tokens... \n");
