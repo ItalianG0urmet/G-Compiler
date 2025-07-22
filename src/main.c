@@ -5,7 +5,7 @@
 
 #include "../include/ast.h"
 #include "../include/llvm.h"
-#include "../include/tokenizer.h"
+#include "../include/lexer.h"
 
 int main(int argc, const char* argv[]) {
     // Tokenizer

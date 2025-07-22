@@ -1,7 +1,7 @@
 #ifndef AST_TYPES
 #define AST_TYPES
 
-#include "tokenizer.h"
+#include "lexer.h"
 
 enum Argument_type {
     ARG_INT,

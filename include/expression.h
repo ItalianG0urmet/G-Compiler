@@ -2,7 +2,7 @@
 #define EXPRESSION_H
 
 #include "ast_types.h"
-#include "tokenizer.h"
+#include "lexer.h"
 
 struct Node* parse_expression(const struct Token* tokens,
                                 const int* current_index);
