@@ -16,7 +16,8 @@ static int fpeek(FILE* file) {
     return c;
 }
 
-static struct Token first_token(const char buffer[MAX_TOKEN_VALUE], char current) {
+static struct Token first_token(const char buffer[MAX_TOKEN_VALUE],
+                                char current) {
     struct Token temp;
 
     if (strcmp(buffer, "int") == TRUE) {
@@ -91,6 +92,7 @@ struct Token* tokenizer(FILE* file) {
     int tokens_count = 0;
     int current_column = 0;
     char line_buffer[MAX_LINE_LEN];
+    int line_buffer_count = 0;
     struct Token* tokens = malloc(sizeof(struct Token) * tokens_capacity);
     if (tokens == NULL) {
         fprintf(stderr, "[-] Can't allocate memory for token");
@@ -103,10 +105,16 @@ struct Token* tokenizer(FILE* file) {
 
     int current;
     while ((current = fgetc(file)) != EOF) {
+        // Line buffer
+        if (current != '\n' && line_buffer_count < MAX_LINE_LEN - 1)
+            line_buffer[line_buffer_count++] = (char)current;
 
         // New line check
-        if (current == '\n'){
+        if (current == '\n') {
             current_column++;
+            line_buffer[line_buffer_count++] = '\0';
+            memset(line_buffer, 0, sizeof(line_buffer));
+            line_buffer_count = 0;
         }
 
         // TEXT
@@ -118,11 +126,14 @@ struct Token* tokenizer(FILE* file) {
             current = fgetc(file);
             while (current != '"' && current != EOF &&
                    i < sizeof(temp.value) - 1) {
+                if (line_buffer_count < MAX_LINE_LEN - 1)
+                    line_buffer[line_buffer_count++] = (char)current;
                 temp.value[i++] = (char)current;
                 current = fgetc(file);
             }
             temp.value[i] = '\0';
             temp.column = current_column;
+            temp.full_line = line_buffer;
 
             push_token(&tokens, &temp, &tokens_capacity, &tokens_count);
             continue;
@@ -142,6 +153,7 @@ struct Token* tokenizer(FILE* file) {
             }
             temp.value[i] = '\0';
             temp.column = current_column;
+            temp.full_line = line_buffer;
 
             push_token(&tokens, &temp, &tokens_capacity, &tokens_count);
             continue;
@@ -153,6 +165,7 @@ struct Token* tokenizer(FILE* file) {
                 buffer[count] = '\0';
                 struct Token temp = first_token(buffer, current);
                 temp.column = current_column;
+                temp.full_line = line_buffer;
                 push_token(&tokens, &temp, &tokens_capacity, &tokens_count);
                 count = 0;
                 buffer[0] = '\0';
@@ -182,6 +195,7 @@ struct Token* tokenizer(FILE* file) {
                 buffer[count] = '\0';
                 struct Token temp = first_token(buffer, current);
                 temp.column = current_column;
+                temp.full_line = line_buffer;
                 push_token(&tokens, &temp, &tokens_capacity, &tokens_count);
                 count = 0;
                 buffer[0] = '\0';
@@ -331,6 +345,7 @@ struct Token* tokenizer(FILE* file) {
             }
 
             temp.column = current_column;
+            temp.full_line = line_buffer;
             push_token(&tokens, &temp, &tokens_capacity, &tokens_count);
             continue;
         }
@@ -344,6 +359,7 @@ struct Token* tokenizer(FILE* file) {
         buffer[count] = '\0';
         struct Token temp = first_token(buffer, '\0');
         temp.column = current_column;
+        temp.full_line = "end";
         push_token(&tokens, &temp, &tokens_capacity, &tokens_count);
         printf("[EOF-TOKEN] %s\n", temp.value);
     }
@@ -353,6 +369,7 @@ struct Token* tokenizer(FILE* file) {
     finish.type = TOKEN_OEF;
     strncpy(finish.value, "404", sizeof(finish.value));
     finish.column = current_column;
+    finish.full_line = "end";
     push_token(&tokens, &finish, &tokens_capacity, &tokens_count);
 
     return tokens;
