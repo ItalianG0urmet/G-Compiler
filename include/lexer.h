@@ -2,6 +2,7 @@
 #define TOKENIZER_H
 
 #include <stdio.h>
+#define MAX_LINE_LEN 1024
 
 enum Token_type {
     TOKEN_IDENTIFIER,  // identifier
@@ -49,7 +50,7 @@ struct Token {
     enum Token_type type;
     char value[256];
     int column;
-    char* full_line;
+    char full_line[MAX_LINE_LEN];
 };
 
 struct Token* tokenizer(FILE* file);

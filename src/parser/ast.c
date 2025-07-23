@@ -3,22 +3,33 @@
 #include <stdlib.h>
 #include <string.h>
 
-struct Node* transform_into_node(const struct Token* tokens, int* current_index) {
+static inline void send_syntax_error(const struct Token* token,
+                                     const char* error) {
+    fprintf(stderr,
+            "\n\x1b[31mError\x1b[0m at line %d:\n"
+            "  %s\n"
+            "  %s\n",
+            token->column, error, token->full_line);
+}
+
+struct Node* transform_into_node(const struct Token* tokens,
+                                 int* current_index) {
     struct Node* node = calloc(1, sizeof(struct Node));
     check_if_allocated(node, __LINE__);
 
+#define PEEK(i) (tokens[*current_index + (i)])
+
     // If
-    if (tokens[*current_index].type == TOKEN_IDENTIFIER &&
-        strcmp(tokens[*current_index].value, "if") == 0) {
+    if (PEEK(0).type == TOKEN_IDENTIFIER && strcmp(PEEK(0).value, "if") == 0) {
         printf("[+] Found if \n");
         node = parse_if(tokens, current_index);
         return node;
     }
 
     // Float & not init
-    if (tokens[*current_index].type == TOKEN_FLOAT) {
-        if (tokens[*current_index + 1].type == TOKEN_IDENTIFIER) {
-            if (tokens[*current_index + 2].type == TOKEN_END) {
+    if (PEEK(0).type == TOKEN_FLOAT) {
+        if (PEEK(1).type == TOKEN_IDENTIFIER) {
+            if (PEEK(2).type == TOKEN_END) {
                 strncpy(node->name, tokens[*current_index + 1].value,
                         sizeof(node->name));
                 node->type = NO_ASSIGN_FLOAT;
@@ -26,114 +37,98 @@ struct Node* transform_into_node(const struct Token* tokens, int* current_index)
                 return node;
             }
 
-            if (tokens[*current_index + 2].type == TOKEN_ASSIGN &&
-                tokens[*current_index + 3].type == TOKEN_FLOAT &&
-                strcmp(tokens[*current_index + 3].value, "float") != 0) {
-                strncpy(node->name, tokens[*current_index + 1].value,
-                        sizeof(node->name));
+            if (PEEK(2).type == TOKEN_ASSIGN && PEEK(3).type == TOKEN_FLOAT &&
+                strcmp(PEEK(3).value, "float") != 0) {
+                strncpy(node->name, PEEK(1).value, sizeof(node->name));
                 node->type = NO_ASSIGN_FLOAT;
-                node->floating = atof(tokens[*current_index + 3].value);
+                node->floating = atof(PEEK(3).value);
                 *current_index += 5;
                 return node;
             }
 
-            fprintf(stderr, "[-] Syntax error in float definition\n");
+            send_syntax_error(&PEEK(0), "Malformed float declaration");
             exit(1);
         }
     }
 
     // Int & not init
-    if (tokens[*current_index].type == TOKEN_INT) {
-        if (tokens[*current_index + 1].type == TOKEN_IDENTIFIER) {
-            if (tokens[*current_index + 2].type == TOKEN_END) {
-                strncpy(node->name, tokens[*current_index + 1].value,
-                        sizeof(node->name));
+    if (PEEK(0).type == TOKEN_INT) {
+        if (PEEK(1).type == TOKEN_IDENTIFIER) {
+            if (PEEK(2).type == TOKEN_END) {
+                strncpy(node->name, PEEK(1).value, sizeof(node->name));
                 node->type = NO_ASSIGN_INT;
                 *current_index += 3;
                 return node;
             }
-            if (tokens[*current_index + 2].type == TOKEN_ASSIGN) {
-                if (tokens[*current_index + 3].type == TOKEN_INT &&
-                    strcmp(tokens[*current_index + 3].value, "int") != 0) {
-                    strncpy(node->name, tokens[*current_index + 1].value,
-                            sizeof(node->name));
+            if (PEEK(2).type == TOKEN_ASSIGN) {
+                if (PEEK(3).type == TOKEN_INT &&
+                    strcmp(PEEK(3).value, "int") != 0) {
+                    strncpy(node->name, PEEK(1).value, sizeof(node->name));
                     node->type = NO_ASSIGN_INT;
-                    node->number = atoi(tokens[*current_index + 3].value);
+                    node->number = atoi(PEEK(3).value);
                     *current_index += 5;
                     return node;
                 }
-                fprintf(stderr, "[-] Syntax error \n");
+                send_syntax_error(&PEEK(0), "Invalid initializer for int");
                 exit(1);
             }
-            fprintf(stderr, "[-] Invalid int \n");
+            send_syntax_error(&PEEK(0), "Invalid int declaration");
             exit(1);
         }
     }
 
     // Increment
-    if (tokens[*current_index].type == TOKEN_IDENTIFIER &&
-        tokens[*current_index + 1].type == TOKEN_INCREMENT &&
-        tokens[*current_index + 2].type == TOKEN_END) {
+    if (PEEK(0).type == TOKEN_IDENTIFIER && PEEK(1).type == TOKEN_INCREMENT &&
+        PEEK(2).type == TOKEN_END) {
         node->type = NO_INCREMENT;
         *current_index += 3;
         return node;
     }
 
     // Char
-    if (tokens[*current_index].type == TOKEN_CHAR &&
-        tokens[*current_index + 1].type == TOKEN_IDENTIFIER) {
-        if (tokens[*current_index + 2].type == TOKEN_END) {
-            strncpy(node->name, tokens[*current_index + 1].value,
-                    sizeof(node->name));
+    if (PEEK(0).type == TOKEN_CHAR && PEEK(1).type == TOKEN_IDENTIFIER) {
+        if (PEEK(2).type == TOKEN_END) {
+            strncpy(node->name, PEEK(1).value, sizeof(node->name));
             node->type = NO_ASSIGN_CHAR;
             *current_index += 3;
             return node;
         }
-        if (tokens[*current_index + 2].type == TOKEN_ASSIGN &&
-            tokens[*current_index + 3].type == TOKEN_LETTER) {
-            strncpy(node->name, tokens[*current_index + 1].value,
-                    sizeof(node->name));
+        if (PEEK(2).type == TOKEN_ASSIGN && PEEK(3).type == TOKEN_LETTER) {
+            strncpy(node->name, PEEK(1).value, sizeof(node->name));
             node->type = NO_ASSIGN_CHAR;
-            node->letter = tokens[*current_index + 3].value[0];
+            node->letter = PEEK(3).value[0];
             *current_index += 5;
             return node;
         }
-        fprintf(stderr, "[-] Syntax error in char definition\n");
+        send_syntax_error(&PEEK(0), "Syntax error in char declaration");
         exit(1);
     }
 
     // Return
-    if (tokens[*current_index].type == TOKEN_IDENTIFIER &&
-        strcmp(tokens[*current_index].value, "return") == 0) {
-        if (tokens[*current_index + 1].type == TOKEN_INT &&
-            strcmp(tokens[*current_index + 1].value, "int") != 0) {
-            const int return_code = atoi(tokens[*current_index + 1].value);
+    if (PEEK(0).type == TOKEN_IDENTIFIER &&
+        strcmp(PEEK(0).value, "return") == 0) {
+        if (PEEK(1).type == TOKEN_INT && strcmp(PEEK(1).value, "int") != 0) {
+            const int return_code = atoi(PEEK(1).value);
             node->type = NO_RETURN;
             node->number = return_code;
             *current_index += 3;
             return node;
         }
-        fprintf(stderr, "[-] Invalid syntax on return function \n");
+        send_syntax_error(&PEEK(0), "Invalid return statement");
         exit(1);
     }
 
-    // Text
-    if (tokens[*current_index].type == TOKEN_TEXT &&
-        tokens[*current_index - 1].type != TOKEN_ASSIGN) {
-        if (tokens[*current_index + 1].type == TOKEN_END) {
+    // Text (print)
+    if (PEEK(0).type == TOKEN_TEXT && PEEK(-1).type != TOKEN_ASSIGN) {
+        if (PEEK(1).type == TOKEN_END) {
             node->type = NO_PRINT;
-            strncpy(node->name, tokens[*current_index].value,
-                    sizeof(node->name));
+            strncpy(node->name, PEEK(0).value, sizeof(node->name));
             *current_index += 2;
             return node;
         }
     }
 
-    fprintf(stderr,
-            "[-] Unknown or unsupported token at index %d (type=%d, "
-            "value='%s')\n",
-            *current_index, tokens[*current_index].type,
-            tokens[*current_index].value);
+    send_syntax_error(&PEEK(0), "Unknown or unsupported token");
     exit(1);
 }
 
