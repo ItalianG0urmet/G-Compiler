@@ -2,6 +2,7 @@
 
 #include <stdlib.h>
 #include "ast_utils.h"
+#include "ast_types.h"
 
 // TODO
 static struct Node* parse_expression(const struct Token* tokens, int* current_index){

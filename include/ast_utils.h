@@ -1,7 +1,7 @@
 #ifndef AST_UTILS_H
 #define AST_UTILS_H
 
-#include "ast_types.h"
+#include "lexer.h"
 
 #define EXPECT(tokens, idx, expected, msg)                        \
     do {                                                          \

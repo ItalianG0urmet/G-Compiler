@@ -1,6 +1,7 @@
 #include "ast_utils.h"
 
 #include <stdlib.h>
+#include "lexer.h"
 
 __attribute__((noreturn, cold)) void token_failed(const struct Token* tokens,
                                                          int index,

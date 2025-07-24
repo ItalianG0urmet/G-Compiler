@@ -2,6 +2,7 @@
 #define AST_H
 
 #include "ast_types.h"
+struct Token;
 
 struct Node* transform_into_node(const struct Token* tokens, int* current_index);
 struct Function* get_function_by_name(const char* name, struct Function_list function_list);
