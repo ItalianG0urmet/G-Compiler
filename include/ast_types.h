@@ -1,7 +1,7 @@
 #ifndef AST_TYPES
 #define AST_TYPES
 
-#include "lexer.h"
+#define MAX_LINE_LEN 1024
 
 enum Argument_type {
     ARG_INT,
@@ -69,6 +69,9 @@ struct Node {
         int number;      // only for NO_NUM or NO_RETURN
         float floating;  // only for NO_NUM or NO_RETURN
     };
+
+    char full_line[MAX_LINE_LEN];
+    int column;
 };
 
 enum Function_return_type {

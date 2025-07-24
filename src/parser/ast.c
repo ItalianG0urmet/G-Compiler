@@ -2,17 +2,12 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include "ast_utils.h"
-#include <if.h>
 
-static inline void send_syntax_error(const struct Token* token,
-                                     const char* error) {
-    fprintf(stderr,
-            "\n\x1b[31mError\x1b[0m at line %d:\n"
-            "  %s\n"
-            "  %s\n",
-            token->column, error, token->full_line);
-}
+#include "ast_utils.h"
+#include "error_utils.h"
+#include "ast_utils.h"
+#include "if.h"
+#include "lexer.h"
 
 struct Node* transform_into_node(const struct Token* tokens,
                                  int* current_index) {
@@ -20,6 +15,9 @@ struct Node* transform_into_node(const struct Token* tokens,
     check_if_allocated(node, __LINE__);
 
 #define PEEK(i) (tokens[*current_index + (i)])
+
+    node->column = PEEK(0).column;
+    strncpy(node->full_line, PEEK(0).full_line, sizeof(node->full_line));
 
     // If
     if (PEEK(0).type == TOKEN_IDENTIFIER && strcmp(PEEK(0).value, "if") == 0) {

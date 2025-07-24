@@ -8,6 +8,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "error_utils.h"
+
 /* Var utils */
 static struct Variable* add_variable(struct Variable** head, const char* name,
                                      LLVMValueRef ref, LLVMTypeRef type) {
@@ -44,9 +46,10 @@ static LLVMTypeRef find_variable_type(struct Variable* head, const char* name) {
 }
 
 /* Assign */
-void llvm_var_assign_number(const struct Node* node, struct Variable** variables,
-                         const LLVMBuilderRef builder,
-                         const LLVMTypeRef type) {
+void llvm_var_assign_number(const struct Node* node,
+                            struct Variable** variables,
+                            const LLVMBuilderRef builder,
+                            const LLVMTypeRef type) {
     const LLVMValueRef var = LLVMBuildAlloca(builder, type, node->name);
     LLVMBuildStore(builder, LLVMConstInt(type, node->number, 0), var);
     *variables = add_variable(variables, node->name, var, type);
@@ -61,18 +64,20 @@ void llvm_var_assign_float(const struct Node* node, struct Variable** variables,
 }
 
 /* Reassign */
-void llvm_var_reassign_number(const struct Node* node, struct Variable** variables,
-                           const LLVMBuilderRef builder,
-                           const LLVMTypeRef type) {
+void llvm_var_reassign_number(const struct Node* node,
+                              struct Variable** variables,
+                              const LLVMBuilderRef builder,
+                              const LLVMTypeRef type) {
     LLVMValueRef var = find_variable(*variables, node->name);
     LLVMTypeRef original_type = find_variable_type(*variables, node->name);
     if (!var) {
-        fprintf(stderr, "[-] Variable '%s' used before declaration\n",
-                node->name);
+        send_syntax_error_by_line(node->full_line, node->column,
+                                  "Variable used before declaration");
         exit(1);
     }
     if (original_type != type) {
-        fprintf(stderr, "[-] Wrong declaration for var '%s' \n", node->name);
+        send_syntax_error_by_line(node->full_line, node->column,
+                                  "Wrong delcaration for var");
         exit(1);
     }
     LLVMBuildStore(builder, LLVMConstInt(type, node->number, 0), var);
@@ -85,12 +90,13 @@ void llvm_var_reassign_float(const struct Node* node,
     LLVMValueRef var = find_variable(*variables, node->name);
     LLVMTypeRef type = find_variable_type(*variables, node->name);
     if (!var) {
-        fprintf(stderr, "[-] Variable '%s' used before declaration\n",
-                node->name);
+        send_syntax_error_by_line(node->full_line, node->column,
+                                  "Variable used before declaration");
         exit(1);
     }
     if (type != float_type) {
-        fprintf(stderr, "[-] Wrong declaration for var '%s' \n", node->name);
+        send_syntax_error_by_line(node->full_line, node->column,
+                                  "Wrong delcaration for var");
         exit(1);
     }
     LLVMBuildStore(builder, LLVMConstReal(float_type, node->floating), var);
