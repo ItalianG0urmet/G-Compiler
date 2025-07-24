@@ -1,4 +1,5 @@
-#include "../include/args_manager.h"
+#include "args_manager.h"
+
 #include <string.h>
 
 struct Flags get_arguments_flags(int argc, const char* argv[]) {

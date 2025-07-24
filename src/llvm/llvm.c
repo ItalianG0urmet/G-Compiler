@@ -1,12 +1,16 @@
-#include "../../include/llvm.h"
+#include "llvm.h"
 
+#include <llvm-c/Analysis.h>
 #include <llvm-c/BitWriter.h>
 #include <llvm-c/Core.h>
 #include <llvm-c/Target.h>
 #include <llvm-c/TargetMachine.h>
+#include <llvm-c/Types.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "ast.h"
+#include "llvm_var.h"
 
 static void generate_function_ir(struct Function* fun, LLVMContextRef* context,
                                  const LLVMModuleRef* module) {

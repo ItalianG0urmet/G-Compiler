@@ -2,7 +2,6 @@
 #define AST_UTILS_H
 
 #include "ast_types.h"
-#include "stdlib.h"
 
 #define EXPECT(tokens, idx, expected, msg)                        \
     do {                                                          \

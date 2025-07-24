@@ -1,4 +1,7 @@
-#include "../../include/if.h"
+#include "if.h"
+
+#include <stdlib.h>
+#include "ast_utils.h"
 
 // TODO
 static struct Node* parse_expression(const struct Token* tokens, int* current_index){

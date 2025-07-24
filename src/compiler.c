@@ -1,4 +1,9 @@
-#include "../include/compiler.h"
+#include "compiler.h"
+
+#include <stdlib.h>
+#include "ast.h"
+#include "llvm.h"
+#include "lexer_utils.h"
 
 __attribute__((noreturn, cold)) static void file_not_found_error(
     const char* file_path) {

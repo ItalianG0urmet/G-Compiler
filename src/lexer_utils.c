@@ -1,4 +1,4 @@
-#include "../include/lexer_utils.h"
+#include "lexer_utils.h"
 
 const char* token_type_to_string(const enum Token_type type) {
     switch (type) {

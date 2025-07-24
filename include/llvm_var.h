@@ -2,7 +2,7 @@
 #define LLVM_VAR_H
 
 #include <llvm-c/Core.h>
-struct Node; // From ast_type.h
+#include "ast_types.h"
 
 struct Variable {
     char name[64];

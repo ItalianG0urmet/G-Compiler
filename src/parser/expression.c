@@ -1,4 +1,6 @@
-#include "../../include/expression.h"
+#include "expression.h"
+
+#include <lexer.h>
 
 static int get_node_position(enum Token_type type) {
     if (type == TOKEN_ASTERISK || type == TOKEN_DIVISION) return 1;

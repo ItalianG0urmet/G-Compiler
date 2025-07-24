@@ -1,4 +1,6 @@
-#include "../../include/ast_utils.h"
+#include "ast_utils.h"
+
+#include <stdlib.h>
 
 __attribute__((noreturn, cold)) void token_failed(const struct Token* tokens,
                                                          int index,

@@ -1,7 +1,7 @@
 #include <llvm-c/BitWriter.h>
 
-#include "../include/compiler.h"
-#include "../include/args_manager.h"
+#include "compiler.h"
+#include "args_manager.h"
 
 int main(int argc, const char* argv[]) {
 

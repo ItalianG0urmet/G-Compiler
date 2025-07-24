@@ -1,7 +1,9 @@
-#include "../../include/ast.h"
+#include "ast.h"
 
 #include <stdlib.h>
 #include <string.h>
+#include "ast_utils.h"
+#include <if.h>
 
 static inline void send_syntax_error(const struct Token* token,
                                      const char* error) {
