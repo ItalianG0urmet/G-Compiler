@@ -1,12 +1,46 @@
 #include "../include/llvm.h"
 
-#include <llvm-c/Analysis.h>
 #include <llvm-c/BitWriter.h>
 #include <llvm-c/Core.h>
 #include <llvm-c/Target.h>
 #include <llvm-c/TargetMachine.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+
+static struct Variable* add_variable(struct Variable* head, const char* name,
+                                     LLVMValueRef ref, LLVMTypeRef type) {
+    struct Variable* var = malloc(sizeof(struct Variable));
+    if (!var) {
+        fprintf(stderr, "[-] Failed to allocate memory for variable\n");
+        exit(1);
+    }
+    strncpy(var->name, name, sizeof(var->name));
+    var->ref = ref;
+    var->next = head;
+    var->type = type;
+    return var;
+}
+
+static LLVMValueRef find_variable(struct Variable* head, const char* name) {
+    while (head) {
+        if (strcmp(head->name, name) == 0) {
+            return head->ref;
+        }
+        head = head->next;
+    }
+    return NULL;
+}
+
+static LLVMTypeRef find_variable_type(struct Variable* head, const char* name) {
+    while (head) {
+        if (strcmp(head->name, name) == 0) {
+            return head->type;
+        }
+        head = head->next;
+    }
+    return NULL;
+}
 
 static void generate_function_ir(struct Function* fun, LLVMContextRef* context,
                                  const LLVMModuleRef* module) {
@@ -45,14 +79,72 @@ static void generate_function_ir(struct Function* fun, LLVMContextRef* context,
     LLVMPositionBuilderAtEnd(builder, entry);
 
     const struct Node* node = fun->body->body;
+    struct Variable* variables = NULL;
     while (node != NULL) {
         switch (node->type) {
-            // TODO: case NO_ASSIGN_INT_NDEF:
+            case NO_REASSIGN_INT: {
+                LLVMValueRef var = find_variable(variables, node->name);
+                LLVMTypeRef type = find_variable_type(variables, node->name);
+                if (!var) {
+                    fprintf(stderr,
+                            "[-] Variable '%s' used before declaration\n",
+                            node->name);
+                    exit(1);
+                }
+                if (type != int_type) {
+                    fprintf(stderr, "[-] Wrong declaration for var '%s' \n",
+                            node->name);
+                    exit(1);
+                }
+                LLVMBuildStore(builder, LLVMConstInt(int_type, node->number, 0),
+                               var);
+                break;
+            }
+
+            case NO_REASSIGN_FLOAT: {
+                LLVMValueRef var = find_variable(variables, node->name);
+                LLVMTypeRef type = find_variable_type(variables, node->name);
+                if (!var) {
+                    fprintf(stderr,
+                            "[-] Variable '%s' used before declaration\n",
+                            node->name);
+                    exit(1);
+                }
+                if (type != float_type) {
+                    fprintf(stderr, "[-] Wrong declaration for var '%s' \n",
+                            node->name);
+                    exit(1);
+                }
+                LLVMBuildStore(builder,
+                               LLVMConstReal(float_type, node->floating), var);
+                break;
+            }
+
+            case NO_REASSIGN_CHAR: {
+                LLVMValueRef var = find_variable(variables, node->name);
+                LLVMTypeRef type = find_variable_type(variables, node->name);
+                if (!var) {
+                    fprintf(stderr,
+                            "[-] Variable '%s' used before declaration\n",
+                            node->name);
+                    exit(1);
+                }
+                if (type != char_type) {
+                    fprintf(stderr, "[-] Wrong declaration for var '%s' \n",
+                            node->name);
+                    exit(1);
+                }
+                LLVMBuildStore(builder,
+                               LLVMConstInt(char_type, node->letter, 0), var);
+                break;
+            }
+
             case NO_ASSIGN_INT: {
                 const LLVMValueRef var =
                     LLVMBuildAlloca(builder, int_type, node->name);
                 LLVMBuildStore(builder, LLVMConstInt(int_type, node->number, 0),
                                var);
+                variables = add_variable(variables, node->name, var, int_type);
                 break;
             }
 
@@ -61,7 +153,8 @@ static void generate_function_ir(struct Function* fun, LLVMContextRef* context,
                     LLVMBuildAlloca(builder, float_type, node->name);
                 LLVMBuildStore(builder,
                                LLVMConstReal(float_type, node->floating), var);
-
+                variables =
+                    add_variable(variables, node->name, var, float_type);
                 break;
             }
 
@@ -70,6 +163,7 @@ static void generate_function_ir(struct Function* fun, LLVMContextRef* context,
                     LLVMBuildAlloca(builder, char_type, node->name);
                 LLVMBuildStore(builder,
                                LLVMConstInt(char_type, node->letter, 0), var);
+                variables = add_variable(variables, node->name, var, char_type);
                 break;
             }
             case NO_PRINT: {

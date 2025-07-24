@@ -77,14 +77,6 @@ struct Node* transform_into_node(const struct Token* tokens,
         }
     }
 
-    // Increment
-    if (PEEK(0).type == TOKEN_IDENTIFIER && PEEK(1).type == TOKEN_INCREMENT &&
-        PEEK(2).type == TOKEN_END) {
-        node->type = NO_INCREMENT;
-        *current_index += 3;
-        return node;
-    }
-
     // Char
     if (PEEK(0).type == TOKEN_CHAR && PEEK(1).type == TOKEN_IDENTIFIER) {
         if (PEEK(2).type == TOKEN_END) {
@@ -102,6 +94,38 @@ struct Node* transform_into_node(const struct Token* tokens,
         }
         send_syntax_error(&PEEK(0), "Syntax error in char declaration");
         exit(1);
+    }
+
+    // Reassign int
+    if (PEEK(0).type == TOKEN_IDENTIFIER && PEEK(1).type == TOKEN_ASSIGN &&
+        PEEK(2).type == TOKEN_INT && strcmp(PEEK(2).value, "int") != 0 &&
+        PEEK(3).type == TOKEN_END) {
+        strncpy(node->name, PEEK(0).value, sizeof(node->name));
+        node->type = NO_REASSIGN_INT;
+        node->number = atoi(PEEK(2).value);
+        *current_index += 4;
+        return node;
+    }
+
+    // Reassign float
+    if (PEEK(0).type == TOKEN_IDENTIFIER && PEEK(1).type == TOKEN_ASSIGN &&
+        PEEK(2).type == TOKEN_FLOAT && strcmp(PEEK(2).value, "float") != 0 &&
+        PEEK(3).type == TOKEN_END) {
+        strncpy(node->name, PEEK(0).value, sizeof(node->name));
+        node->type = NO_REASSIGN_FLOAT;
+        node->floating = atof(PEEK(2).value);
+        *current_index += 4;
+        return node;
+    }
+
+    // Reassign char
+    if (PEEK(0).type == TOKEN_IDENTIFIER && PEEK(1).type == TOKEN_ASSIGN &&
+        PEEK(2).type == TOKEN_LETTER && PEEK(3).type == TOKEN_END) {
+        strncpy(node->name, PEEK(0).value, sizeof(node->name));
+        node->type = NO_REASSIGN_CHAR;
+        node->letter = PEEK(2).value[0];
+        *current_index += 4;
+        return node;
     }
 
     // Return

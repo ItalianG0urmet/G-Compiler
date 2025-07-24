@@ -27,6 +27,10 @@ enum Node_type {
     NO_DIV,
     NO_INCREMENT,
 
+    NO_REASSIGN_INT,
+    NO_REASSIGN_FLOAT,
+    NO_REASSIGN_CHAR,
+
     NO_ASSIGN_INT,
     NO_ASSIGN_FLOAT,
     NO_ASSIGN_CHAR,
