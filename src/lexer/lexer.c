@@ -111,9 +111,9 @@ struct Token* tokenizer(FILE* file) {
                 int ti = 0;
                 unsigned int start_col = column;
 
-                for (line_position++, column++;
+                for (line_position++;
                      line_position < line_lenght && line[line_position] != '"';
-                     line_position++, column++) {
+                     line_position++) {
                     if (ti < (int)sizeof(temp.value) - 1)
                         temp.value[ti++] = line[line_position];
                 }
@@ -132,9 +132,9 @@ struct Token* tokenizer(FILE* file) {
                 int ti = 0;
                 unsigned int start_col = column;
 
-                for (line_position++, column++;
+                for (line_position++;
                      line_position < line_lenght && line[line_position] != '\'';
-                     line_position++, column++) {
+                     line_position++) {
                     if (ti < (int)sizeof(temp.value) - 1)
                         temp.value[ti++] = line[line_position];
                 }
