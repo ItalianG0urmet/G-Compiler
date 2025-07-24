@@ -9,12 +9,6 @@
 #define TRUE 0
 #define INIT_TOKEN_CAPACITY 16
 
-static int fpeek(FILE* file) {
-    const int c = fgetc(file);
-    if (c != EOF) ungetc(c, file);
-    return c;
-}
-
 static struct Token first_token(const char buffer[MAX_TOKEN_VALUE],
                                 char current_char) {
     struct Token temp;
@@ -176,7 +170,7 @@ struct Token* tokenizer(FILE* file) {
 
             // Digits
             if (isdigit(current_char) ||
-                (current_char == '.' && isdigit(fpeek(file)))) {
+                (current_char == '.' && isdigit(line[line_position + 1]))) {
                 if (count < sizeof(buffer) - 1) {
                     buffer[count++] = (char)current_char;
                 }
