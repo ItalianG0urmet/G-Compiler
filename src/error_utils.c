@@ -13,6 +13,8 @@ void send_syntax_error_by_line(const char* line, const int column,
 }
 
 void send_syntax_error(const struct Token* token, const char* error) {
+    if (!token) return;
+
     fprintf(stderr,
             "\n\x1b[31mError\x1b[0m at line %d:\n"
             "  %s\n"
