@@ -11,6 +11,8 @@ struct Variable {
     struct Variable* next;
 };
 
+LLVMValueRef find_variable(struct Variable* head, const char* name);
+
 /* Assign */
 void llvm_var_assign_number(const struct Node* node, struct Variable** variables,
                          const LLVMBuilderRef builder,

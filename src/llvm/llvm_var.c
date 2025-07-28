@@ -25,16 +25,6 @@ static struct Variable* add_variable(struct Variable** head, const char* name,
     return var;
 }
 
-static LLVMValueRef find_variable(struct Variable* head, const char* name) {
-    while (head) {
-        if (strcmp(head->name, name) == 0) {
-            return head->ref;
-        }
-        head = head->next;
-    }
-    return NULL;
-}
-
 static LLVMTypeRef find_variable_type(struct Variable* head, const char* name) {
     while (head) {
         if (strcmp(head->name, name) == 0) {
@@ -44,6 +34,17 @@ static LLVMTypeRef find_variable_type(struct Variable* head, const char* name) {
     }
     return NULL;
 }
+
+LLVMValueRef find_variable(struct Variable* head, const char* name) {
+    while (head) {
+        if (strcmp(head->name, name) == 0) {
+            return head->ref;
+        }
+        head = head->next;
+    }
+    return NULL;
+}
+
 
 /* Assign */
 void llvm_var_assign_number(const struct Node* node,
