@@ -9,8 +9,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include "ast.h"
 #include "llvm_var.h"
+#include "error_utils.h"
 
 static void generate_function_ir(struct Function* fun, LLVMContextRef* context,
                                  const LLVMModuleRef* module) {
@@ -102,18 +104,70 @@ static void generate_function_ir(struct Function* fun, LLVMContextRef* context,
                     case RET_VOID:
                         LLVMBuildRetVoid(builder);
                         break;
-                    case RET_INT:
-                        LLVMBuildRet(builder,
-                                     LLVMConstInt(int_type, node->number, 0));
+
+                    case RET_INT: {
+                        if (node->name[0] != '\0') {
+                            LLVMValueRef var =
+                                find_variable(variables, node->name);
+                            if (!var) {
+                                send_syntax_error_by_line(
+                                    node->full_line, node->column,
+                                    "Variable not declared");
+                                exit(1);
+                            }
+                            LLVMValueRef loaded_val = LLVMBuildLoad2(
+                                builder, int_type, var, "ret_int");
+                            LLVMBuildRet(builder, loaded_val);
+                        } else {
+                            LLVMBuildRet(
+                                builder,
+                                LLVMConstInt(int_type, node->number, 0));
+                        }
                         break;
-                    case RET_FLOAT:
-                        LLVMBuildRet(builder,
-                                     LLVMConstReal(float_type, node->floating));
+                    }
+
+                    case RET_FLOAT: {
+                        if (node->name[0] != '\0') {
+                            LLVMValueRef var =
+                                find_variable(variables, node->name);
+                            if (!var) {
+                                send_syntax_error_by_line(
+                                    node->full_line, node->column,
+                                    "Variable not declared");
+                                exit(1);
+                            }
+                            LLVMValueRef loaded_val = LLVMBuildLoad2(
+                                builder, float_type, var, "ret_float");
+                            LLVMBuildRet(builder, loaded_val);
+                        } else {
+                            LLVMBuildRet(
+                                builder,
+                                LLVMConstReal(float_type, node->floating));
+                        }
                         break;
-                    case RET_CHAR:
-                        LLVMBuildRet(builder,
-                                     LLVMConstInt(char_type, node->letter, 0));
+                    }
+
+                    case RET_CHAR: {
+                        if (node->name[0] != '\0') {
+                            LLVMValueRef var =
+                                find_variable(variables, node->name);
+                            if (!var) {
+                                send_syntax_error_by_line(
+                                    node->full_line, node->column,
+                                    "Variable not declared");
+                                exit(1);
+                            }
+                            LLVMValueRef loaded_val = LLVMBuildLoad2(
+                                builder, char_type, var, "ret_char");
+                            LLVMBuildRet(builder, loaded_val);
+                        } else {
+                            LLVMBuildRet(
+                                builder,
+                                LLVMConstInt(char_type, node->letter, 0));
+                        }
                         break;
+                    }
+
                     default:
                         fprintf(stderr, "[-] Invalid return in %s\n",
                                 fun->name);

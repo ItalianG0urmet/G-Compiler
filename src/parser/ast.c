@@ -137,7 +137,13 @@ struct Node* transform_into_node(const struct Token* tokens,
             node->number = return_code;
             *current_index += 3;
             return node;
+        } else if (PEEK(1).type == TOKEN_IDENTIFIER){
+            node->type = NO_RETURN;
+            strncpy(node->name, PEEK(1).value, sizeof(node->name));
+            *current_index += 3;
+            return node;
         }
+
         send_syntax_error(&PEEK(0), "Invalid return statement");
         exit(1);
     }
