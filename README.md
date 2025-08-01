@@ -30,33 +30,28 @@ make
 ```c
 @import "std";
 
-#define LIMIT 5
+@macro LIMIT 5
 
-@unsafe
-int getTwo() {
-    return 2;
-}
+fun getTuple() : <int, bool> {
 
-(int, bool) getTuple() {
     int* ptr = allocate(sizeof(int), 1) ?: {
         "Allocation failed\n";  // Implicit print on error
         return (0, false);
     };
+
     *ptr = 5;
     return (*ptr, true);
 }
 
-int main() {
+fun main() : int {
     // Tuple unpacking with type inference
     let (a, b) = getTuple();
+
     if (!b) {
         return -1;
     }
-    print("A: {}, B: {}\n", a, b);
 
     int array[LIMIT] = {1, 2, 3, 4, 5};
-    // Accessing out-of-bounds elements will cause a runtime error
-    // int x = array[10];
 
     "Hello, how are you\n"; // Implicitly prints the string
 
@@ -73,5 +68,3 @@ int main() {
 - [ ] Complex types (structs)
 - [ ] Optimization manager
 - [ ] Memory management
-- [ ] Annotation
-- [ ] Memory safety
