@@ -5,14 +5,17 @@
 #define MAX_LINE_LEN 1024
 
 enum Token_type {
+    TOKEN_VOID,   // void
+    TOKEN_INT,    // 0
+    TOKEN_FLOAT,  // 0.0
+    TOKEN_CHAR,   // char
+
+    TOKEN_FUNCTION,    // fun
     TOKEN_IDENTIFIER,  // identifier
-    TOKEN_VOID,        // void
-    TOKEN_INT,         // 0
-    TOKEN_FLOAT,       // 0.0
-    TOKEN_CHAR,        // char
     TOKEN_TEXT,        // "
     TOKEN_LETTER,      // '
     TOKEN_DOT,         // .
+    TOKEN_COLON,       // :
 
     TOKEN_NOT,     // !
     TOKEN_EQUAL,   // ==

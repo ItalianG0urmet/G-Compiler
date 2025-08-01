@@ -2,6 +2,10 @@
 
 const char* token_type_to_string(const enum Token_type type) {
     switch (type) {
+        case TOKEN_COLON:
+            return "COLON";
+        case TOKEN_FUNCTION:
+            return "FUNCTION";
         case TOKEN_EQUAL:
             return "EQUAL";
         case TOKEN_PLUS:

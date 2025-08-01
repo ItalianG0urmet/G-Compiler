@@ -1,4 +1,4 @@
-#include "../include/lexer.h"
+#include "lexer.h"
 
 #include <ctype.h>
 #include <stdbool.h>
@@ -15,6 +15,8 @@ static struct Token first_token(const char buffer[MAX_TOKEN_VALUE],
 
     if (strcmp(buffer, "int") == TRUE) {
         temp.type = TOKEN_INT;
+    } else if (strcmp(buffer, "fun") == TRUE) {
+        temp.type = TOKEN_FUNCTION;
     } else if (strcmp(buffer, "char") == TRUE) {
         temp.type = TOKEN_CHAR;
     } else if (strcmp(buffer, "float") == TRUE) {
@@ -178,7 +180,7 @@ struct Token* tokenizer(FILE* file) {
             }
 
             // Symbols
-            if (strchr("|=,;{}()>&<!*.+-/", current_char)) {
+            if (strchr("|=,;:{}()>&<!*.+-/", current_char)) {
                 if (count > 0) {
                     buffer[count] = '\0';
                     struct Token temp = first_token(buffer, current_char);
@@ -203,7 +205,12 @@ struct Token* tokenizer(FILE* file) {
                             ungetc(next, file);
                         }
                         break;
-                    case '/':
+                    case ':':
+                        temp.type = TOKEN_COLON;
+                        temp.value[0] = ':';
+                        temp.value[1] = '\0';
+                        break;
+                     case '/':
                         temp.type = TOKEN_DIVISION;
                         temp.value[0] = '/';
                         temp.value[1] = '\0';
