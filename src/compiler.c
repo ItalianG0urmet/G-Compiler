@@ -44,10 +44,7 @@ static struct Function_list parse_functions(const struct Token* tokens) {
     while (tokens[current_index].type != TOKEN_OEF) {
         const struct Token current_token = tokens[current_index];
         // Check for valid return type and parse the function
-        if ((current_token.type == TOKEN_INT ||
-             current_token.type == TOKEN_FLOAT ||
-             current_token.type == TOKEN_CHAR ||
-             current_token.type == TOKEN_VOID) &&
+        if ((current_token.type == TOKEN_FUNCTION) &&
             tokens[current_index + 1].type == TOKEN_IDENTIFIER &&
             tokens[current_index + 2].type == TOKEN_LPAREN) {
             struct Function* fun = calloc(1, sizeof(struct Function));

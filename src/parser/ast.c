@@ -74,6 +74,93 @@ struct Node* transform_into_node(const struct Token* tokens,
     exit(1);
 }
 
+struct Function parse_function(const struct Token* tokens, int* current_index) {
+    struct Function fun = {0};
+
+    if (tokens[*current_index].type != TOKEN_FUNCTION ||
+        tokens[*current_index + 1].type != TOKEN_IDENTIFIER ||
+        tokens[*current_index + 2].type != TOKEN_LPAREN) {
+        fprintf(stderr, "[-] Invalid function declaration\n");
+        exit(1);
+    }
+
+    strncpy(fun.name, tokens[*current_index + 1].value, sizeof(fun.name));
+
+    *current_index += 3;
+
+    fun.arguments = parse_param(tokens, *current_index);
+
+    while (tokens[*current_index].type != TOKEN_RPAREN &&
+           tokens[*current_index].type != TOKEN_OEF) {
+        (*current_index)++;
+    }
+
+    if (tokens[*current_index].type == TOKEN_RPAREN) {
+        (*current_index)++;
+    }
+
+    fun.return_type = RET_VOID;
+
+    if (tokens[*current_index].type == TOKEN_COLON) {
+        const struct Token ret_type_token = tokens[*current_index + 1];
+        if (ret_type_token.type == TOKEN_INT) {
+            fun.return_type = RET_INT;
+        } else if (ret_type_token.type == TOKEN_CHAR) {
+            fun.return_type = RET_CHAR;
+        } else if (ret_type_token.type == TOKEN_FLOAT) {
+            fun.return_type = RET_FLOAT;
+        } else {
+            fprintf(stderr, "[-] Invalid return type: %s\n", ret_type_token.value);
+            exit(1);
+        }
+        *current_index += 2;
+    }
+
+    while (tokens[*current_index].type != TOKEN_LBRACE &&
+           tokens[*current_index].type != TOKEN_OEF) {
+        (*current_index)++;
+    }
+
+    if (tokens[*current_index].type != TOKEN_LBRACE) {
+        fprintf(stderr, "[-] Expected '{' after function header\n");
+        exit(1);
+    }
+    (*current_index)++;
+
+    struct Node* body = calloc(1, sizeof(struct Node));
+    check_if_allocated(body, __LINE__);
+    body->type = NO_BODY;
+
+    struct Node* last = NULL;
+    int node_count = 0;
+
+    while (tokens[*current_index].type != TOKEN_RBRACE &&
+           tokens[*current_index].type != TOKEN_OEF) {
+        struct Node* node = transform_into_node(tokens, current_index);
+        if (body->body == NULL) {
+            body->body = node;
+        } else {
+            if (last) {
+                last->next = node;
+            }
+        }
+        last = node;
+        node_count++;
+    }
+
+    if (tokens[*current_index].type == TOKEN_RBRACE) {
+        (*current_index)++;
+    } else {
+        fprintf(stderr, "[-] Missing closing '}' in function '%s'\n", fun.name);
+        exit(1);
+    }
+
+    fun.body = body;
+    fun.node_count = node_count;
+
+    return fun;
+}
+
 struct Function* get_function_by_name(
     const char* name, const struct Function_list function_list) {
     for (int i = 0; i < function_list.count; i++) {
@@ -82,85 +169,6 @@ struct Function* get_function_by_name(
         }
     }
     return NULL;
-}
-
-struct Function parse_function(const struct Token* tokens, int* current_index) {
-    struct Token identifier = tokens[*current_index + 1];
-
-    // Find return type
-    enum Function_return_type return_type;
-    switch (tokens[*current_index].type) {
-        case TOKEN_VOID:
-            return_type = RET_VOID;
-            break;
-        case TOKEN_INT:
-            return_type = RET_INT;
-            break;
-        case TOKEN_CHAR:
-            return_type = RET_CHAR;
-            break;
-        case TOKEN_FLOAT:
-            return_type = RET_FLOAT;
-            break;
-        default:
-            fprintf(stderr, "[-] Can't find return type of %s\n",
-                    identifier.value);
-            exit(1);
-    }
-
-    // Parse the args and define
-    struct Argument* args = parse_param(tokens, *current_index + 3);
-    while (tokens[*current_index].type == TOKEN_LBRACE) {
-        (*current_index)++;
-    }
-
-    struct Function fun;
-    fun.arguments = args;
-    fun.return_type = return_type;
-
-    EXPECT(tokens, *current_index + 1, TOKEN_IDENTIFIER,
-           "invalid function identifier");
-
-    strncpy(fun.name, identifier.value, sizeof(fun.name));
-
-    // Skip to {
-    while (tokens[*current_index].type != TOKEN_LBRACE) {
-        (*current_index)++;
-    }
-    (*current_index)++;
-
-    // Start node transformation
-    struct Node* body = calloc(1, sizeof(struct Node));
-    check_if_allocated(body, __LINE__);
-    body->type = NO_BODY;
-    struct Node* last = NULL;
-    int node_count = 0;
-    while (tokens[*current_index].type != TOKEN_RBRACE &&
-           tokens[*current_index].type != TOKEN_OEF) {
-        struct Node* node = transform_into_node(tokens, current_index);
-
-        if (body->body == NULL) {
-            body->body = node;
-        } else {
-            if (last == NULL) {
-                fprintf(stderr, "[-] Last is null \n");
-                exit(1);
-            }
-            last->next = node;
-        }
-
-        last = node;
-        node_count++;
-    }
-
-    if (last) {
-        last->next = NULL;
-    }
-
-    fun.body = body;
-    fun.node_count = node_count;
-    (*current_index)++;
-    return fun;
 }
 
 struct Argument* parse_param(const struct Token* tokens,
