@@ -60,6 +60,22 @@ fun main() : int {
 
 ```
 
+## **Current functional example**
+```c
+fun main() : int {
+
+    let x = 10;
+    float y = 20.0;
+    x = 1;
+
+    "Hello world!\n";
+
+    return x;
+}
+```
+
+
+
 ## **Development Roadmap**
 
 - [x] Basic tokenizer
