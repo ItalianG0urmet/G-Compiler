@@ -198,8 +198,7 @@ struct Node* var_reassign_int(const struct Token* tokens, int* current_index,
             val = -atoi(PEEK(3).value);
             *current_index += 5;
         } else {
-            send_syntax_error(&PEEK(0), "Invalid reassignment for int");
-            exit(1);
+            return NULL;
         }
         node->type = NO_REASSIGN_INT;
         node->number = val;
@@ -223,8 +222,7 @@ struct Node* var_reassign_float(const struct Token* tokens, int* current_index,
             val = -atof(PEEK(3).value);
             *current_index += 5;
         } else {
-            send_syntax_error(&PEEK(0), "Invalid reassignment for float");
-            exit(1);
+            return NULL;
         }
         node->type = NO_REASSIGN_FLOAT;
         node->floating = val;
