@@ -5,6 +5,7 @@
 #define MAX_LINE_LEN 1024
 
 enum Token_type {
+    TOKEN_LET,    // let
     TOKEN_VOID,   // void
     TOKEN_INT,    // 0
     TOKEN_FLOAT,  // 0.0

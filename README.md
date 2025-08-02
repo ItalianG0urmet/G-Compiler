@@ -63,8 +63,10 @@ fun main() : int {
 ## **Development Roadmap**
 
 - [x] Basic tokenizer
-- [x] AST for variables/functions
+- [x] Char, Int, Float variables
+- [x] Let variables
 - [ ] Control flow (if/while)
+- [ ] Functions
 - [ ] Complex types (structs)
 - [ ] Optimization manager
 - [ ] Memory management

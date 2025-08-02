@@ -36,6 +36,7 @@ struct Node* transform_into_node(const struct Token* tokens,
     TRY_PARSE(var_assign_int);
     TRY_PARSE(var_assign_float);
     TRY_PARSE(var_assign_char);
+    TRY_PARSE(var_assign_let);
     TRY_PARSE(var_reassign_int);
     TRY_PARSE(var_reassign_float);
     TRY_PARSE(var_reassign_char);

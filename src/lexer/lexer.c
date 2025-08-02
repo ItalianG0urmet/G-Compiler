@@ -21,6 +21,8 @@ static struct Token first_token(const char buffer[MAX_TOKEN_VALUE],
         temp.type = TOKEN_CHAR;
     } else if (strcmp(buffer, "float") == TRUE) {
         temp.type = TOKEN_FLOAT;
+    } else if (strcmp(buffer, "let") == TRUE) {
+        temp.type = TOKEN_LET;
     } else if (strcmp(buffer, "void") == TRUE) {
         temp.type = TOKEN_VOID;
     } else {

@@ -21,4 +21,7 @@ struct Node* var_reassign_float(const struct Token* tokens, int* current_index,
 
 struct Node* var_reassign_char(const struct Token* tokens, int* current_index,
                                struct Node* node);
+
+struct Node* var_assign_let(const struct Token* tokens, int* current_index,
+                            struct Node* node);
 #endif

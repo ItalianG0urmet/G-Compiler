@@ -113,6 +113,75 @@ struct Node* var_assign_float(const struct Token* tokens, int* current_index,
     return NULL;
 }
 
+struct Node* var_assign_let(const struct Token* tokens, int* current_index,
+                            struct Node* node) {
+    if (PEEK(0).type != TOKEN_LET) {
+        return NULL;
+    }
+
+    if (PEEK(1).type != TOKEN_IDENTIFIER) {
+        send_syntax_error(&PEEK(1), "Expected identifier after 'let'");
+        exit(1);
+    }
+
+    strncpy(node->name, PEEK(1).value, sizeof(node->name));
+
+    if (PEEK(2).type != TOKEN_ASSIGN) {
+        send_syntax_error(&PEEK(2), "Expected '=' after identifier");
+        exit(1);
+    }
+
+    const struct Token* value_token = &PEEK(3);
+
+    // INT assignment
+    if (value_token->type == TOKEN_INT &&
+        strcmp(value_token->value, "int") != 0) {
+        node->type = NO_ASSIGN_INT;
+        node->number = atoi(value_token->value);
+        *current_index += 5;
+        return node;
+    }
+
+    // Negative INT
+    if (value_token->type == TOKEN_MINUS && PEEK(4).type == TOKEN_INT &&
+        strcmp(PEEK(4).value, "int") != 0) {
+        node->type = NO_ASSIGN_INT;
+        node->number = -atoi(PEEK(4).value);
+        *current_index += 6;
+        return node;
+    }
+
+    // FLOAT assignment
+    if (value_token->type == TOKEN_FLOAT &&
+        strcmp(value_token->value, "float") != 0) {
+        node->type = NO_ASSIGN_FLOAT;
+        node->floating = atof(value_token->value);
+        *current_index += 5;
+        return node;
+    }
+
+    // Negative FLOAT
+    if (value_token->type == TOKEN_MINUS && PEEK(4).type == TOKEN_FLOAT &&
+        strcmp(PEEK(4).value, "float") != 0) {
+        node->type = NO_ASSIGN_FLOAT;
+        node->floating = -atof(PEEK(4).value);
+        *current_index += 6;
+        return node;
+    }
+
+    // CHAR assignment
+    if (value_token->type == TOKEN_LETTER) {
+        node->type = NO_ASSIGN_CHAR;
+        node->letter = value_token->value[0];
+        *current_index += 5;
+        return node;
+    }
+
+    send_syntax_error(value_token,
+                      "Unsupported value type in 'let' assignment");
+    exit(1);
+}
+
 // -- reassign --
 struct Node* var_reassign_int(const struct Token* tokens, int* current_index,
                               struct Node* node) {
@@ -176,4 +245,3 @@ struct Node* var_reassign_char(const struct Token* tokens, int* current_index,
     }
     return NULL;
 }
-
