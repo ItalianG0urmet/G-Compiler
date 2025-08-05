@@ -1,7 +1,10 @@
 #ifndef AST_TYPES
 #define AST_TYPES
 
+#include <stdbool.h>
+
 #define MAX_LINE_LEN 1024
+#define MAX_IDENTIFIER_LENGTH 256
 
 enum Argument_type {
     ARG_INT,
@@ -63,27 +66,27 @@ struct Node {
     struct Node* body;  // Point to the first node
     struct Node* next;  // Point to the next node
 
-    char name[256];  // Name of var or Name of text
+    char name[MAX_IDENTIFIER_LENGTH];  // Name of var or Name of text
+    bool use_identifier;
     union {
         char letter;     // Just for chars
         int number;      // only for NO_NUM or NO_RETURN
         float floating;  // only for NO_NUM or NO_RETURN
+        char identifier[MAX_IDENTIFIER_LENGTH];
     };
 
     char full_line[MAX_LINE_LEN];
     int column;
 };
 
-enum Function_return_type {
-    RET_INT, RET_CHAR, RET_FLOAT, RET_VOID
-};
+enum Function_return_type { RET_INT, RET_CHAR, RET_FLOAT, RET_VOID };
 
 struct Function {
     enum Function_return_type return_type;
     struct Node* body;
     int node_count;
     struct Argument* arguments;
-    char name[256];
+    char name[MAX_IDENTIFIER_LENGTH];
 };
 
 struct Function_list {

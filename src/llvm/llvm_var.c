@@ -45,24 +45,71 @@ LLVMValueRef find_variable(struct Variable* head, const char* name) {
     return NULL;
 }
 
-
 /* Assign */
 void llvm_var_assign_number(const struct Node* node,
                             struct Variable** variables,
                             const LLVMBuilderRef builder,
                             const LLVMTypeRef type) {
-    const LLVMValueRef var = LLVMBuildAlloca(builder, type, node->name);
-    LLVMBuildStore(builder, LLVMConstInt(type, node->number, 0), var);
+    LLVMValueRef var = LLVMBuildAlloca(builder, type, node->name);
+    LLVMValueRef value;
+
+    if (node->use_identifier) {
+        LLVMValueRef source = find_variable(*variables, node->identifier);
+        LLVMTypeRef source_type = find_variable_type(*variables, node->identifier);
+
+        if (!source) {
+            send_syntax_error_by_line(node->full_line, node->column,
+                                      "Variable used before declaration");
+            exit(1);
+        }
+
+        if (source_type != type) {
+            send_syntax_error_by_line(node->full_line, node->column,
+                                      "Type mismatch in assignment");
+            exit(1);
+        }
+
+        value = LLVMBuildLoad2(builder, type, source, "loadtmp");
+    } else {
+        value = LLVMConstInt(type, node->number, /* signExtend */ 0);
+    }
+
+    LLVMBuildStore(builder, value, var);
     *variables = add_variable(variables, node->name, var, type);
 }
 
-void llvm_var_assign_float(const struct Node* node, struct Variable** variables,
+void llvm_var_assign_float(const struct Node* node,
+                           struct Variable** variables,
                            const LLVMBuilderRef builder,
                            const LLVMTypeRef float_type) {
-    const LLVMValueRef var = LLVMBuildAlloca(builder, float_type, node->name);
-    LLVMBuildStore(builder, LLVMConstReal(float_type, node->floating), var);
+    LLVMValueRef var = LLVMBuildAlloca(builder, float_type, node->name);
+    LLVMValueRef value;
+
+    if (node->use_identifier) {
+        LLVMValueRef source = find_variable(*variables, node->identifier);
+        LLVMTypeRef source_type = find_variable_type(*variables, node->identifier);
+
+        if (!source) {
+            send_syntax_error_by_line(node->full_line, node->column,
+                                      "Variable used before declaration");
+            exit(1);
+        }
+
+        if (source_type != float_type) {
+            send_syntax_error_by_line(node->full_line, node->column,
+                                      "Type mismatch in float assignment");
+            exit(1);
+        }
+
+        value = LLVMBuildLoad2(builder, float_type, source, "loadtmp");
+    } else {
+        value = LLVMConstReal(float_type, node->floating);
+    }
+
+    LLVMBuildStore(builder, value, var);
     *variables = add_variable(variables, node->name, var, float_type);
 }
+
 
 /* Reassign */
 void llvm_var_reassign_number(const struct Node* node,
@@ -78,7 +125,7 @@ void llvm_var_reassign_number(const struct Node* node,
     }
     if (original_type != type) {
         send_syntax_error_by_line(node->full_line, node->column,
-                                  "Wrong delcaration for var");
+                                  "Wrong declaration for variable");
         exit(1);
     }
     LLVMBuildStore(builder, LLVMConstInt(type, node->number, 0), var);
@@ -97,7 +144,7 @@ void llvm_var_reassign_float(const struct Node* node,
     }
     if (type != float_type) {
         send_syntax_error_by_line(node->full_line, node->column,
-                                  "Wrong delcaration for var");
+                                  "Wrong declaration for variable");
         exit(1);
     }
     LLVMBuildStore(builder, LLVMConstReal(float_type, node->floating), var);

@@ -9,55 +9,134 @@
 
 #define PEEK(i) (tokens[*current_index + (i)])
 
-// -- assign --
 struct Node* var_assign_int(const struct Token* tokens, int* current_index,
                             struct Node* node) {
-    if (PEEK(0).type == TOKEN_INT) {
-        if (PEEK(1).type == TOKEN_IDENTIFIER) {
-            if (PEEK(2).type == TOKEN_END) {
-                strncpy(node->name, PEEK(1).value, sizeof(node->name));
+    if (PEEK(0).type == TOKEN_INT && PEEK(1).type == TOKEN_IDENTIFIER) {
+        node->identifier[0] = '\0';
+        node->use_identifier = false;
+
+        if (PEEK(2).type == TOKEN_END) {
+            strncpy(node->name, PEEK(1).value, sizeof(node->name));
+            node->type = NO_ASSIGN_INT;
+            *current_index += 3;
+            return node;
+        }
+
+        if (PEEK(2).type == TOKEN_ASSIGN) {
+            strncpy(node->name, PEEK(1).value, sizeof(node->name));
+
+            // Identifier: int x = y;
+            if (PEEK(3).type == TOKEN_IDENTIFIER) {
+                strncpy(node->identifier, PEEK(3).value,
+                        sizeof(node->identifier));
                 node->type = NO_ASSIGN_INT;
-                *current_index += 3;
+                node->use_identifier = true;
+                *current_index += 5;
                 return node;
             }
-            if (PEEK(2).type == TOKEN_ASSIGN) {
-                strncpy(node->name, PEEK(1).value, sizeof(node->name));
-                int val;
-                // Positive number
-                if (PEEK(3).type == TOKEN_INT &&
-                    strcmp(PEEK(3).value, "int") != 0) {
-                    val = atoi(PEEK(3).value);
-                    *current_index += 5;
-                }
-                // Negative number
-                else if (PEEK(3).type == TOKEN_MINUS &&
-                         PEEK(4).type == TOKEN_INT &&
-                         strcmp(PEEK(4).value, "int") != 0) {
-                    val = -atoi(PEEK(4).value);
-                    *current_index += 6;
-                } else {
-                    send_syntax_error(&PEEK(0), "Invalid initializer for int");
-                    exit(1);
-                }
-                node->type = NO_ASSIGN_INT;
-                node->number = val;
+
+            // Positive int x = 10;
+            else if (PEEK(3).type == TOKEN_INT &&
+                     strcmp(PEEK(3).value, "int") != 0) {
+                node->number = atoi(PEEK(3).value);
+                node->type   = NO_ASSIGN_INT;
+                *current_index += 5;
                 return node;
             }
-            send_syntax_error(&PEEK(0), "Invalid int declaration");
+
+            // Negative int x = -10;
+            else if (PEEK(3).type == TOKEN_MINUS &&
+                     PEEK(4).type == TOKEN_INT &&
+                     strcmp(PEEK(4).value, "int") != 0) {
+                node->number = -atoi(PEEK(4).value);
+                node->type   = NO_ASSIGN_INT;
+                *current_index += 6;
+                return node;
+            }
+
+            send_syntax_error(&PEEK(0), "Invalid initializer for int");
             exit(1);
         }
+
+        send_syntax_error(&PEEK(0), "Invalid int declaration");
+        exit(1);
     }
     return NULL;
 }
 
+struct Node* var_assign_float(const struct Token* tokens, int* current_index,
+                              struct Node* node) {
+    if (PEEK(0).type == TOKEN_FLOAT && PEEK(1).type == TOKEN_IDENTIFIER) {
+        node->identifier[0] = '\0';
+        node->use_identifier = false;
+
+        if (PEEK(2).type == TOKEN_END) {
+            strncpy(node->name, PEEK(1).value, sizeof(node->name));
+            node->type = NO_ASSIGN_FLOAT;
+            node->use_identifier = true;
+            *current_index += 3;
+            return node;
+        }
+
+        if (PEEK(2).type == TOKEN_ASSIGN) {
+            strncpy(node->name, PEEK(1).value, sizeof(node->name));
+
+            // Identifier float x = y;
+            if (PEEK(3).type == TOKEN_IDENTIFIER) {
+                printf("Trovato un identifier! \n");
+                strncpy(node->identifier, PEEK(3).value,
+                        sizeof(node->identifier));
+                node->type = NO_ASSIGN_FLOAT;
+                *current_index += 5;
+                return node;
+            }
+
+            // Positive float x = 3.14;
+            else if (PEEK(3).type == TOKEN_FLOAT &&
+                     strcmp(PEEK(3).value, "float") != 0) {
+                node->floating = atof(PEEK(3).value);
+                node->type     = NO_ASSIGN_FLOAT;
+                *current_index += 5;
+                return node;
+            }
+
+            // Negative float x = -3.14;
+            else if (PEEK(3).type == TOKEN_MINUS &&
+                     PEEK(4).type == TOKEN_FLOAT &&
+                     strcmp(PEEK(4).value, "float") != 0) {
+                node->floating = -atof(PEEK(4).value);
+                node->type     = NO_ASSIGN_FLOAT;
+                *current_index += 6;
+                return node;
+            }
+
+            send_syntax_error(&PEEK(0), "Invalid initializer for float");
+            exit(1);
+        }
+
+        send_syntax_error(&PEEK(0), "Malformed float declaration");
+        exit(1);
+    }
+    return NULL;
+}
+
+
 struct Node* var_assign_char(const struct Token* tokens, int* current_index,
                              struct Node* node) {
     if (PEEK(0).type == TOKEN_CHAR && PEEK(1).type == TOKEN_IDENTIFIER) {
+        node->identifier[0] = '\0';
+        node->use_identifier = false;
         if (PEEK(2).type == TOKEN_END) {
             strncpy(node->name, PEEK(1).value, sizeof(node->name));
             node->type = NO_ASSIGN_CHAR;
+            node->use_identifier = true;
             *current_index += 3;
             return node;
+        }
+        if (PEEK(2).type == TOKEN_ASSIGN && PEEK(3).type == TOKEN_IDENTIFIER) {
+            printf("Trovat un identifier! \n");
+            strncpy(node->identifier, PEEK(3).value, sizeof(node->identifier));
+            *current_index += 5;
         }
         if (PEEK(2).type == TOKEN_ASSIGN && PEEK(3).type == TOKEN_LETTER) {
             strncpy(node->name, PEEK(1).value, sizeof(node->name));
@@ -68,47 +147,6 @@ struct Node* var_assign_char(const struct Token* tokens, int* current_index,
         }
         send_syntax_error(&PEEK(0), "Syntax error in char declaration");
         exit(1);
-    }
-    return NULL;
-}
-
-struct Node* var_assign_float(const struct Token* tokens, int* current_index,
-                              struct Node* node) {
-    if (PEEK(0).type == TOKEN_FLOAT) {
-        if (PEEK(1).type == TOKEN_IDENTIFIER) {
-            if (PEEK(2).type == TOKEN_END) {
-                strncpy(node->name, PEEK(1).value, sizeof(node->name));
-                node->type = NO_ASSIGN_FLOAT;
-                *current_index += 3;
-                return node;
-            }
-            if (PEEK(2).type == TOKEN_ASSIGN) {
-                strncpy(node->name, PEEK(1).value, sizeof(node->name));
-                double val;
-                // Positive number
-                if (PEEK(3).type == TOKEN_FLOAT &&
-                    strcmp(PEEK(3).value, "float") != 0) {
-                    val = atof(PEEK(3).value);
-                    *current_index += 5;
-                }
-                // Negative number
-                else if (PEEK(3).type == TOKEN_MINUS &&
-                         PEEK(4).type == TOKEN_FLOAT &&
-                         strcmp(PEEK(4).value, "float") != 0) {
-                    val = -atof(PEEK(4).value);
-                    *current_index += 6;
-                } else {
-                    send_syntax_error(&PEEK(0),
-                                      "Invalid initializer for float");
-                    exit(1);
-                }
-                node->type = NO_ASSIGN_FLOAT;
-                node->floating = val;
-                return node;
-            }
-            send_syntax_error(&PEEK(0), "Malformed float declaration");
-            exit(1);
-        }
     }
     return NULL;
 }
