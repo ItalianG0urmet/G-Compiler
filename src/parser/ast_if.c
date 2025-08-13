@@ -1,4 +1,4 @@
-#include "if.h"
+#include "ast_if.h"
 
 #include <stdlib.h>
 #include "ast_utils.h"

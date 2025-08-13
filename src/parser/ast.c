@@ -5,9 +5,9 @@
 
 #include "ast_utils.h"
 #include "error_utils.h"
-#include "if.h"
+#include "ast_if.h"
 #include "lexer.h"
-#include "var.h"
+#include "ast_var.h"
 
 #define PEEK(i) (tokens[*current_index + (i)])
 
