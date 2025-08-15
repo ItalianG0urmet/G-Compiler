@@ -25,8 +25,8 @@ void generate_llvm(struct Function_list function_list, const char* output_file,
     llvm_generator_generate_function_ir(main_fun, &context, &module);
     if (debug_active) {
         char* ir = LLVMPrintModuleToString(module);
-        printf("\n=== Generated LLVM IR ===\n%s", ir);
-        printf("=========================\n\n");
+        printf("\n[debug] Generated LLVM IR:\n");
+        printf("%s\n", ir);
         LLVMDisposeMessage(ir);
     }
 

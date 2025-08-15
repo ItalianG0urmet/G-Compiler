@@ -26,13 +26,12 @@ static struct Token* get_tokens(const char* file_path, bool debug_active) {
     fclose(file);
 
     if (debug_active) {
-        printf("\n=========================");
-        printf("\nGenerated tokens:\n");
+        printf("\n[debug] Generated tokens:\n");
         for (int i = 0; tokens[i].type != TOKEN_OEF; i++) {
             printf("  [%02d] %s, %s\n", i, tokens[i].value,
                    token_type_to_string(tokens[i].type));
         }
-        printf("=========================\n\n");
+        printf("\n");
     }
 
     return tokens;
