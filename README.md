@@ -1,5 +1,9 @@
 # G Compiler ![](https://img.shields.io/badge/Platform-Linux-blue) ![InDev](https://img.shields.io/badge/Status-Development%20Phase-red) ![LLVM-15](https://img.shields.io/badge/LLVM-15%2B-orange)
 
+## **On Hold**
+
+This project is temporarily suspended while I focus on my studies.
+
 ## **Description**
 
 This is a simple compiler for a custom-made language that I am creating. It will be a C-like language with some modern features.
